@@ -144,3 +144,57 @@ def test_include_single_extension(monkeypatch: pytest.MonkeyPatch) -> None:
     assert matcher("subdir/bar.blend")
     assert not matcher("foo.py")
     assert not matcher("bar.txt")
+
+
+def test_priority_option(monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    Test the priority option: whether include or ignore takes precedence.
+    """
+    # Case 1: priority = "ignore" (default)
+    toml_content_ignore = """
+    priority = "ignore"
+    [include]
+    patterns = ["data/important.txt"]
+    [ignore]
+    patterns = ["data/"]
+    """
+    toml_path_ignore = write_toml(toml_content_ignore)
+    monkeypatch.setenv("WATCHER_CONFIG_TOML", toml_path_ignore)
+    config_mod = reload_config_module()
+    cfg = config_mod.get_config()  # type: ignore[attr-defined]
+    matcher = config_mod.get_path_matcher(cfg["patterns"])  # type: ignore[attr-defined]
+    # File is included but inside an ignored dir; should be ignored
+    assert not matcher("data/important.txt")
+
+    # Case 2: priority = "include"
+    toml_content_include = """
+    priority = "include"
+    [include]
+    patterns = ["data/important.txt"]
+    [ignore]
+    patterns = ["data/"]
+    """
+    toml_path_include = write_toml(toml_content_include)
+    monkeypatch.setenv("WATCHER_CONFIG_TOML", toml_path_include)
+    config_mod = reload_config_module()
+    cfg = config_mod.get_config()  # type: ignore[attr-defined]
+    matcher = config_mod.get_path_matcher(cfg["patterns"])  # type: ignore[attr-defined]
+    # File is included but inside an ignored dir; should be included
+    assert matcher("data/important.txt")
+    """
+    Test that a single extension in include patterns only matches that extension (expected use).
+    """
+    toml_content = """
+    [include]
+    patterns = [".blend"]
+    """
+    toml_path = write_toml(toml_content)
+    monkeypatch.setenv("WATCHER_CONFIG_TOML", toml_path)
+    config_mod = reload_config_module()
+    cfg = config_mod.get_config()  # type: ignore[attr-defined]
+    matcher = config_mod.get_path_matcher(cfg["patterns"])  # type: ignore[attr-defined]
+    # Only .blend files should match
+    assert matcher("foo.blend")
+    assert matcher("subdir/bar.blend")
+    assert not matcher("foo.py")
+    assert not matcher("bar.txt")

@@ -5,7 +5,7 @@ Configuration and environment loading for rename_watcher.
 import os
 import pathlib
 from dotenv import load_dotenv
-from typing import Dict, Any, Callable, List
+from typing import Dict, Any, Callable
 
 load_dotenv()
 
@@ -40,7 +40,7 @@ def get_toml_config() -> Dict[str, Any]:
         return {}
 
 
-def get_patterns_from_config(config: Dict[str, Any]) -> Dict[str, List[str]]:
+def get_patterns_from_config(config: Dict[str, Any]) -> Dict[str, Any]:
     """
     Extract include and ignore patterns from config dict.
 
@@ -52,14 +52,15 @@ def get_patterns_from_config(config: Dict[str, Any]) -> Dict[str, List[str]]:
     """
     include = []
     ignore = []
+    priority = config.get("priority", "ignore")
     if "include" in config and isinstance(config["include"], dict):
         include = config["include"].get("patterns", [])  # type: ignore[attr-defined]
     if "ignore" in config and isinstance(config["ignore"], dict):
         ignore = config["ignore"].get("patterns", [])  # type: ignore[attr-defined]
-    return {"include": include, "ignore": ignore}
+    return {"include": include, "ignore": ignore, "priority": priority}
 
 
-def get_env_patterns() -> Dict[str, List[str]]:
+def get_env_patterns() -> Dict[str, Any]:
     """
     Fallback: Get ignore patterns from environment variables.
 
@@ -72,10 +73,11 @@ def get_env_patterns() -> Dict[str, List[str]]:
         if os.getenv("WATCHER_INCLUDE_PATTERNS")
         else []
     )
-    return {"include": include, "ignore": ignore}
+    # Default to ignore priority for env config
+    return {"include": include, "ignore": ignore, "priority": "ignore"}
 
 
-def get_path_matcher(patterns: Dict[str, List[str]]) -> Callable[[str], bool]:
+def get_path_matcher(patterns: Dict[str, Any]) -> Callable[[str], bool]:
     """
     Return a matcher function that returns True if a path should be included (not ignored),
     supporting gitignore negation in include patterns.
@@ -105,6 +107,7 @@ def get_path_matcher(patterns: Dict[str, List[str]]) -> Callable[[str], bool]:
 
     ignore_patterns = [preprocess(p) for p in patterns["ignore"]]
     include_patterns = [preprocess(p) for p in patterns["include"]]
+    priority = patterns.get("priority", "ignore")
     ignore_spec = pathspec.PathSpec.from_lines("gitwildmatch", ignore_patterns)
     # Split include patterns into positive and negative (negated with '!')
     positive_patterns = [p for p in include_patterns if not p.startswith("!")]
@@ -114,15 +117,25 @@ def get_path_matcher(patterns: Dict[str, List[str]]) -> Callable[[str], bool]:
 
     def matcher(path: str) -> bool:
         rel_path = pathlib.PurePath(path).as_posix()
-        if ignore_spec.match_file(rel_path):
-            return False
+        is_ignored = ignore_spec.match_file(rel_path)
+        is_included = False
         if include_patterns:
             if include_spec.match_file(rel_path):
                 if exclude_spec.match_file(rel_path):
-                    return False
-                return True
+                    is_included = False
+                else:
+                    is_included = True
+        else:
+            is_included = True  # If no include patterns, include all not ignored
+
+        # Priority logic
+        if is_ignored and is_included:
+            return priority == "include"
+        if is_ignored:
             return False
-        return True  # If no include patterns, include all not ignored
+        if is_included:
+            return True
+        return False
 
     return matcher
 
@@ -144,4 +157,5 @@ def get_config() -> Dict[str, Any]:
         "poll_interval": float(os.getenv("WATCHER_POLL_INTERVAL", 1.0)),
         "patterns": patterns,
         "matcher": get_path_matcher(patterns),
+        "priority": patterns.get("priority", "ignore"),
     }
