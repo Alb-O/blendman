@@ -1,3 +1,13 @@
+### [2025-07-08] Config: TOML + gitignore-style matcher
+- [x] Implemented TOML config file support for watcher (include/ignore sections, gitignore globbing)
+- [x] Used pathspec for robust gitignore-style matching, including negation (!pattern)
+- [x] Added/updated unit tests for config parsing and matcher logic (expected, edge, failure cases)
+- [x] All tests, lint, and type checks pass
+ - [x] Robust support for simple TOML configs:
+   - [x] `*` in ignore patterns (ignores all files)
+   - [x] Single extension in include patterns (e.g., `.blend` matches only `.blend` files)
+   - [x] Unit tests for these cases (expected, edge, failure)
+   - [x] All validation gates pass
 # NOTEPAD for 002_rename_watcher
 
 - **Core Watcher Module**: Uses `watchdog` to recursively monitor directories for file and directory events (create, delete, move, rename).
