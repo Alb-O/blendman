@@ -5,7 +5,13 @@ Unit tests for utils.py (load_env, get_env_var).
 import os
 import pathlib
 import pytest
-from pocketbase.utils import load_env, get_env_var
+from pocketbase.utils import (
+    load_env,
+    load_envs,
+    get_env_var,
+    get_env_var_typed,
+    require_env_var,
+)
 
 
 def test_load_env_sets_vars(
@@ -31,3 +37,53 @@ def test_get_env_var_default(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("PB_Y", raising=False)
     assert get_env_var("PB_Y", default="zzz") == "zzz"
     assert get_env_var("PB_Y") is None
+
+
+def test_load_envs_multiple(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # .env sets FOO=bar, .env.local overrides FOO=baz
+    env1 = tmp_path / ".env"
+    env2 = tmp_path / ".env.local"
+    env1.write_text("FOO=bar\nBAR=1\n")
+    env2.write_text("FOO=baz\nBAR=2\n")
+    monkeypatch.delenv("FOO", raising=False)
+    monkeypatch.delenv("BAR", raising=False)
+    load_envs([str(env1), str(env2)])
+    assert os.environ["FOO"] == "baz"
+    assert os.environ["BAR"] == "2"
+
+
+def test_get_env_var_typed_int(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("PB_INT", "42")
+    val = get_env_var_typed("PB_INT", int)
+    assert val == 42
+
+
+def test_get_env_var_typed_bool(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("PB_BOOL", "1")
+    val = get_env_var_typed("PB_BOOL", lambda v: v == "1")
+    assert val is True
+
+
+def test_get_env_var_typed_required(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("PB_REQ", raising=False)
+    with pytest.raises(ValueError):
+        get_env_var_typed("PB_REQ", str, required=True)
+
+
+def test_get_env_var_typed_cast_fail(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("PB_BAD", "notanint")
+    with pytest.raises(ValueError):
+        get_env_var_typed("PB_BAD", int)
+
+
+def test_require_env_var_present(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("PB_REQ2", "abc")
+    assert require_env_var("PB_REQ2") == "abc"
+
+
+def test_require_env_var_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("PB_REQ3", raising=False)
+    with pytest.raises(ValueError):
+        require_env_var("PB_REQ3")
