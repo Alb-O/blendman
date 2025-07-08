@@ -6,15 +6,17 @@
 
 - [x] Step 1: Create or update NOTEPAD.md with this task and planning notes
 - [x] Step 2: Implement api.py to compose subclients and load env
- - [x] Step 3: Implement auth.py (login, logout, token management)
-- [ ] Step 4: Implement collections.py (CRUD, query)
-- [ ] Step 5: Implement files.py (upload/download)
+- [x] Step 3: Implement auth.py (login, logout, token management)
+- [x] Step 4: Implement collections.py (CRUD, query)
+- [x] Step 5: Write unit tests for collections.py (expected, edge, failure cases)
+  - All CRUD/query methods implemented, error handling, docstrings, <500 lines.
+  - test_collections.py covers all methods (expected, edge, failure), all tests pass.
+  - All validation gates (ruff, mypy, pytest) clean for collections.
+  - Next: Implement files.py (upload/download)
 - [ ] Step 6: Implement relations.py (link/unlink)
 - [ ] Step 7: Implement exceptions.py (custom errors)
 - [ ] Step 8: Implement utils.py (env, helpers)
- - [x] Step 4: Write Pytest tests for auth.py (expected, edge, failure) in /tests/pocketbase/
 - [ ] Step 10: Add .env.example and update README with setup/usage
- - [x] Step 5: Run ruff, mypy, and pytest to validate auth.py and its tests
 - [ ] Step 12: Mark completed tasks in NOTEPAD.md and finalize
 
 ### Planning Notes
@@ -28,6 +30,26 @@
 
 ---
 
+## Design: collections.py (CRUD, query)
+
+### Class: CollectionsClient
+- Methods:
+  - create(collection: str, data: dict[str, Any]) -> dict[str, Any]
+  - get(collection: str, record_id: str) -> dict[str, Any]
+  - update(collection: str, record_id: str, data: dict[str, Any]) -> dict[str, Any]
+  - delete(collection: str, record_id: str) -> None
+  - query(collection: str, filters: dict[str, Any] | None = None, page: int = 1, per_page: int = 20) -> dict[str, Any]
+- All methods:
+  - Use requests to call PocketBase REST API
+  - Use token from AuthClient if available
+  - Catch and wrap all HTTP errors in PocketBaseError
+  - Validate arguments and raise ValueError if invalid
+
+### Tests:
+- For each method: expected, edge, and failure case
+- All HTTP calls must be mocked
+
+---
 ## Progress Log
 - 2025-07-08: NOTEPAD.md updated, initial plan and todo list added.
 - 2025-07-08: Steps 1 and 2 complete, api.py and tests validated, all type/lint/test gates clean.
