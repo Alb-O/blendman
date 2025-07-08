@@ -27,7 +27,7 @@ uv run --package pocketbase pocketbase-manager start --port 8090
 
 ```sh
 uv run ruff check .
-uv run mypy .
+./mypy_recursive.sh
 ```
 
 ### Add a new package

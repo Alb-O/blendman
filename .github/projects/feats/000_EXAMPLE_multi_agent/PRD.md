@@ -292,7 +292,7 @@ DEPENDENCIES:
 # Run these FIRST - fix any errors before proceeding
 ruff check .
 ruff format .
-mypy .
+./mypy_recursive.sh
 
 # Expected: No errors or warnings. If errors/warnings, fix it immediately.
 ```
@@ -357,10 +357,11 @@ uv run python cli.py
 # Check Gmail drafts folder for created draft
 ```
 
+
 ## Final Validation Checklist (Agent Self-Validation)
 - [ ] All tests pass: `uv run pytest tests/ -v`
 - [ ] No linting errors: `ruff check .`
-- [ ] No type errors: `mypy .`
+- [ ] No type errors: `./mypy_recursive.sh`
 - [ ] Gmail OAuth flow works (browser opens, token saved)
 - [ ] Brave Search returns results
 - [ ] Research Agent invokes Email Agent successfully
