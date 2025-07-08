@@ -1,15 +1,17 @@
 
 ## FEATURE (Agent Mission & Priorities):
 
-[Describe the feature to be built. Be explicit about the end goal, required behaviors, and success criteria.]
+Implement a highly intelligent, robust system of recursively monitoring directories for file/dir renames and moves. The watcher system needs to be able to identify files post rename/movement actions and determine the from/to relationship in real time. This implementation will be its own package like the existing pocketbase_backend.
 
 ## EXAMPLES (Context Awareness):
 
-[List and explain all relevant examples in the `examples/` folder. Specify what patterns or best practices should be extracted and adapted.]
+use #gitHub tool to study `mnaoumov/obsidian-external-rename-handler`, it is written in ts but the concepts will apply here.
 
 ## DOCUMENTATION (Critical Context):
 
-[List all documentation, API references, and resources that must be used. Include URLs and file paths.]
+#fetch https://python-watchdog.readthedocs.io/en/stable/
+
+#fetch https://docs.astral.sh/uv/concepts/projects/workspaces/#workspace-sources (for understanding uv workspaces and the project structure)
 
 ## VALIDATION & SELF-CHECKS (Validation Gates):
 

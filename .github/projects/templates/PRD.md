@@ -73,10 +73,7 @@ This template is optimized for autonomous coding agents to deliver robust, produ
 
 ### Level 1: Syntax & Style
 ```bash
-uv run ruff check .
-uv run ruff format .
-uv run mypy .
-
+./dev.sh
 # Expected: No errors or warnings. If errors/warnings, analyze, fix, and re-run until passing.
 ```
 
