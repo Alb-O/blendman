@@ -10,12 +10,49 @@
    - [x] All validation gates pass
 # NOTEPAD for 002_rename_watcher
 
-- **Core Watcher Module**: Uses `watchdog` to recursively monitor directories for file and directory events (create, delete, move, rename).
-- **Event Processor**: Interprets raw events, deduplicates, and correlates them to determine true renames/moves (using inode/path mapping where possible).
-- **Path-Inode Map**: Maintains a two-way mapping between file paths and inodes (or platform equivalent) to robustly track files across renames/moves.
-- **Config Layer**: Exposes configuration for timeouts, polling intervals, and ignored patterns (e.g., dotfiles).
-- **API Layer**: Provides a clean interface for consumers to subscribe to high-level events (on_rename, on_move, etc.).
-- **Testing & Validation**: All modules are fully unit tested, with tests for expected, edge, and failure cases.
+---
+
+## [2025-07-08] Nested Subfolder Detection & Path Propagation
+
+### Problem
+- When a subfolder is moved or renamed, all included files and subfolders within it must have their paths updated accordingly.
+- The watcher/event processor must detect nested moves/renames and propagate path changes to all tracked descendants.
+- This is critical for correct event reporting and for downstream consumers relying on accurate file paths.
+
+### Requirements
+- Detect moves/renames of any folder, at any nesting depth.
+- For each move/rename, update the path-inode map for all descendants (files and subfolders).
+- Ensure that included files (per config/include patterns) are still tracked and their new paths are reported.
+- Emit correct high-level events for all affected files/folders.
+- Handle edge cases: deeply nested structures, simultaneous moves, and rapid sequences.
+
+### Design/Approach
+- On folder move/rename, enumerate all descendants (recursively) in the path-inode map.
+- For each descendant, update its path in the map to reflect the new parent path.
+- Ensure event processor emits a single high-level event per affected file/folder (avoid duplicate or missing events).
+- Use debouncing to handle rapid/batched moves.
+- Add/extend unit tests for:
+  - Moving a folder with nested files/folders (expected, edge, failure cases)
+  - Moving a folder that contains only ignored files (should not emit events)
+  - Moving a folder with a mix of included/ignored files
+  - Simultaneous moves of multiple nested folders
+
+### TODOs
+- [x] Update event_processor to handle recursive path updates on folder move/rename
+    - Implemented logic in `EventProcessor` to update all descendant paths and emit events on folder move/rename.
+- [x] Update path_map to support efficient descendant enumeration and path updates
+    - Implemented `descendants` and `bulk_update_paths` methods in `PathInodeMap` for efficient recursive updates.
+- [x] Add/extend unit tests for nested folder moves (expected, edge, failure)
+    - Added tests for recursive folder moves and event emission in `test_event_processor.py`.
+- [x] Validate watcher emits correct events for all affected files/folders
+- [ ] Document logic and edge cases in code and README
+
+### Validation
+- [x] All tests (including new nested move tests) pass
+- [x] Lint (ruff) and type checks (mypy) pass
+- [x] No file >500 lines
+
+---
 
 ### Planned File Structure
 
