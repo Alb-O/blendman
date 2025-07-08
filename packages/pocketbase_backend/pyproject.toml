@@ -7,11 +7,7 @@ name = "pocketbase"
 version = "0.1.0"
 description = "PocketBase binary manager for Python projects."
 requires-python = ">=3.8"
-dependencies = [
-    "python-dotenv",
-    "requests"
-]
+dependencies = ["python-dotenv", "requests"]
 
 [project.scripts]
 pocketbase-manager = "pocketbase.pocketbase_manager:main"
-

@@ -68,7 +68,7 @@ if [ -z "$SRC_ROOTS" ]; then
 fi
 
 for SRC_DIR in $SRC_ROOTS; do
-  printf "%b\n" "${YELLOW}Type checking main source code: $SRC_DIR ...${NC}"
+  printf "%b\n" "${NC}Type checking main source code: $SRC_DIR ...${NC}"
   if uv run mypy "$SRC_DIR"; then
     printf "%b\n" "${GREEN}Main source code: PASSED ($SRC_DIR)${NC}"
   else
@@ -76,19 +76,17 @@ for SRC_DIR in $SRC_ROOTS; do
     exit 1
   fi
 
-  # Find sibling tests/ dir for this src/*
-  PKG_DIR=$(dirname "$SRC_DIR")
-  TEST_DIR="$PKG_DIR/tests"
+  # Find package root (parent of src/) and check for tests/ dir there
+  PKG_ROOT=$(dirname $(dirname "$SRC_DIR"))
+  TEST_DIR="$PKG_ROOT/tests"
   if [ -d "$TEST_DIR" ]; then
-    printf "%b\n" "${YELLOW}Type checking tests in $TEST_DIR with src in MYPYPATH...${NC}"
-    if MYPYPATH="$PKG_DIR" uv run mypy "$TEST_DIR"; then
+    printf "%b\n" "${NC}Type checking tests in $TEST_DIR with src in MYPYPATH...${NC}"
+    if MYPYPATH="$PKG_ROOT/src:$PKG_ROOT" uv run mypy "$TEST_DIR"; then
       printf "%b\n" "${GREEN}Tests in $TEST_DIR: PASSED${NC}"
     else
       printf "%b\n" "${RED}Tests in $TEST_DIR: FAILED${NC}"
       exit 1
     fi
-  else
-    printf "%b\n" "${YELLOW}No tests/ found for $SRC_DIR. Skipping test type checks for this package.${NC}"
   fi
 done
 
@@ -97,7 +95,7 @@ for SRC_DIR in $(find ./packages -type d -path "*/src" | grep -v "/\\." | grep -
   PKG_DIR=$(dirname "$SRC_DIR")
   TEST_DIR="$PKG_DIR/tests"
   if [ -d "$TEST_DIR" ]; then
-    printf "%b\n" "${YELLOW}Running pytest for $TEST_DIR with PYTHONPATH=$SRC_DIR ...${NC}"
+    printf "%b\n" "${NC}Running pytest for $TEST_DIR with PYTHONPATH=$SRC_DIR ...${NC}"
     PYTHONPATH="$SRC_DIR" uv run pytest "$TEST_DIR"
   fi
 done

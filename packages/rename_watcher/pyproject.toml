@@ -3,22 +3,16 @@
 name = "rename_watcher"
 version = "0.1.0"
 description = "Cross-platform, robust file/directory rename and move watcher."
-authors = [
-    { name = "Your Name", email = "your@email.com" }
-]
+authors = [{ name = "Your Name", email = "your@email.com" }]
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
     "watchdog>=2.1.5",
     "python-dotenv>=1.0.0",
     "tomli>=2.0.1",
-    "pathspec>=0.12.1"
+    "pathspec>=0.12.1",
 ]
 
-
-
-[tool.pytest.ini_options]
-check_untyped_defs = true
 
 [tool.mypy]
 python_version = "3.8"

@@ -5,6 +5,7 @@ Tests for api.py (PocketBaseAPI composition and env loading).
 import sys  # type: ignore
 import os  # type: ignore
 import pytest
+from _pytest.monkeypatch import MonkeyPatch
 from pocketbase.api import PocketBaseAPI  # type: ignore
 
 # sys.path modification is required for local import resolution in test runner environments.
@@ -24,7 +25,7 @@ def test_api_composes_subclients():
     assert hasattr(api, "relations")  # type: ignore
 
 
-def test_api_env_loaded(monkeypatch):  # type: ignore
+def test_api_env_loaded(monkeypatch: MonkeyPatch):
     """
     Edge: load_env is called on init (simulate with monkeypatch).
     """
@@ -33,12 +34,14 @@ def test_api_env_loaded(monkeypatch):  # type: ignore
     def fake_load_env():
         called["env"] = True
 
-    monkeypatch.setattr("pocketbase.utils.load_env", fake_load_env)  # type: ignore
+    monkeypatch.setattr(
+        "pocketbase.api.load_env", fake_load_env
+    )  # Patch the correct reference
     PocketBaseAPI()
     assert called["env"]
 
 
-def test_api_invalid_import(monkeypatch):  # type: ignore
+def test_api_invalid_import(monkeypatch: MonkeyPatch):
     """
     Failure: If a subclient import fails, raise ImportError.
     """

@@ -2,6 +2,8 @@
 Unit tests for Watcher in watcher.py (stub, as actual file watching requires integration tests).
 """
 
+# pylint: disable=import-outside-toplevel
+
 from rename_watcher.watcher import Watcher
 
 
@@ -16,11 +18,15 @@ def test_init() -> None:
 
 def test_start_stop() -> None:
     """
-    Test start and stop methods exist (edge case).
+    Test start and stop methods raise NotImplementedError on base class (edge case).
     """
     w = Watcher("/tmp")
-    w.start()
-    w.stop()
+    import pytest
+
+    with pytest.raises(NotImplementedError):
+        w.start()
+    with pytest.raises(NotImplementedError):
+        w.stop()
 
 
 def test_on_event_callback() -> None:
