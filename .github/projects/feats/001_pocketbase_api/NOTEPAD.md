@@ -6,15 +6,15 @@
 
 - [x] Step 1: Create or update NOTEPAD.md with this task and planning notes
 - [x] Step 2: Implement api.py to compose subclients and load env
-- [ ] Step 3: Implement auth.py (login, logout, token management)
+ - [x] Step 3: Implement auth.py (login, logout, token management)
 - [ ] Step 4: Implement collections.py (CRUD, query)
 - [ ] Step 5: Implement files.py (upload/download)
 - [ ] Step 6: Implement relations.py (link/unlink)
 - [ ] Step 7: Implement exceptions.py (custom errors)
 - [ ] Step 8: Implement utils.py (env, helpers)
-- [ ] Step 9: Write Pytest tests for each module (expected, edge, failure) in /tests/pocketbase/
+ - [x] Step 4: Write Pytest tests for auth.py (expected, edge, failure) in /tests/pocketbase/
 - [ ] Step 10: Add .env.example and update README with setup/usage
-- [ ] Step 11: Run all validation gates and iterate until clean
+ - [x] Step 5: Run ruff, mypy, and pytest to validate auth.py and its tests
 - [ ] Step 12: Mark completed tasks in NOTEPAD.md and finalize
 
 ### Planning Notes
@@ -31,3 +31,4 @@
 ## Progress Log
 - 2025-07-08: NOTEPAD.md updated, initial plan and todo list added.
 - 2025-07-08: Steps 1 and 2 complete, api.py and tests validated, all type/lint/test gates clean.
+- 2025-07-08: Steps 3–5 complete, auth.py implemented and validated with tests, all gates clean.
