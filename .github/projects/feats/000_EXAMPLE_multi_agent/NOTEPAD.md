@@ -1,0 +1,1 @@
+<!-- REMOVEME -- This file is for low-level and miscellaneous designs and tasks. Use this as a loose TODO list or design notepad for implementations that don't fit into the PRD. Always timestamp your work in here. -->
