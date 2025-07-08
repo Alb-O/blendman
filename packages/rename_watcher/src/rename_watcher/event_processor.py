@@ -3,6 +3,7 @@ Event correlation and rename/move detection for rename_watcher.
 """
 
 from typing import Any, Dict, Optional, Callable
+import time
 
 from .path_map import PathInodeMap
 
@@ -24,9 +25,13 @@ class EventProcessor:
             path_map (PathInodeMap): The path-inode map for tracking file/folder paths.
             emit_event (Optional[Callable]): Callback to emit high-level events.
         """
-        self._pending_events: Dict[str, Any] = {}
+        self._pending_deletes: Dict[str, float] = {}
+        self._pending_creates: Dict[str, float] = {}
+        self._pending_payloads: Dict[str, Dict[str, Any]] = {}
         self.path_map = path_map
         self.emit_event = emit_event
+
+    DEBOUNCE_WINDOW = 0.5  # seconds
 
     def process(self, event: Dict[str, Any]) -> None:
         """
@@ -39,11 +44,9 @@ class EventProcessor:
         src_path = event.get("src_path")
         dest_path = event.get("dest_path")
 
-        # Detect folder move/rename
+        # Detect folder move/rename (native atomic event)
         if event_type in ("moved", "renamed") and src_path and dest_path:
-            # Update all descendants in the path map
             self.path_map.bulk_update_paths(src_path, dest_path)
-            # Emit high-level events for all affected descendants
             descendants = self.path_map.descendants(dest_path)
             for path, inode in descendants.items():
                 if self.emit_event:
@@ -56,7 +59,6 @@ class EventProcessor:
                             "new_parent": dest_path,
                         },
                     )
-            # Emit event for the folder itself
             if self.emit_event:
                 folder_inode = self.path_map.get_inode(dest_path)
                 self.emit_event(
@@ -68,4 +70,87 @@ class EventProcessor:
                         "new_parent": dest_path,
                     },
                 )
-        # ...existing code for other event types (create, delete, etc.) can be added here...
+            return
+
+        now = time.monotonic()
+
+        # Windows-style: try to pair delete/create as move
+        if event_type == "deleted" and src_path:
+            self._pending_deletes[src_path] = now
+            self._pending_payloads[src_path] = {
+                "path": src_path,
+                "inode": self.path_map.get_inode(src_path),
+            }
+            # Try to find a matching create
+            for create_path, create_time in list(self._pending_creates.items()):
+                if abs(now - create_time) < self.DEBOUNCE_WINDOW:
+                    # Heuristic: match by filename
+                    if src_path.split("/")[-1] == create_path.split("/")[-1]:
+                        if self.emit_event:
+                            self.emit_event(
+                                "moved",
+                                {
+                                    "path": create_path,
+                                    "inode": self.path_map.get_inode(create_path),
+                                    "old_parent": src_path,
+                                    "new_parent": create_path,
+                                },
+                            )
+                        del self._pending_creates[create_path]
+                        del self._pending_deletes[src_path]
+                        self._pending_payloads.pop(src_path, None)
+                        return
+            # No match yet, will flush later
+            return
+
+        if event_type == "created" and src_path:
+            self._pending_creates[src_path] = now
+            self._pending_payloads[src_path] = {
+                "path": src_path,
+                "inode": self.path_map.get_inode(src_path),
+            }
+            # Try to find a matching delete
+            for delete_path, delete_time in list(self._pending_deletes.items()):
+                if abs(now - delete_time) < self.DEBOUNCE_WINDOW:
+                    if src_path.split("/")[-1] == delete_path.split("/")[-1]:
+                        if self.emit_event:
+                            self.emit_event(
+                                "moved",
+                                {
+                                    "path": src_path,
+                                    "inode": self.path_map.get_inode(src_path),
+                                    "old_parent": delete_path,
+                                    "new_parent": src_path,
+                                },
+                            )
+                        del self._pending_deletes[delete_path]
+                        del self._pending_creates[src_path]
+                        self._pending_payloads.pop(delete_path, None)
+                        return
+            # No match yet, will flush later
+            return
+
+        # Flush old pending events
+        to_delete: list[str] = []
+        for path, t in self._pending_deletes.items():
+            if now - t > self.DEBOUNCE_WINDOW:
+                if self.emit_event:
+                    self.emit_event(
+                        "deleted", self._pending_payloads.get(path, {"path": path})
+                    )
+                to_delete.append(path)
+        for path in to_delete:
+            del self._pending_deletes[path]
+            self._pending_payloads.pop(path, None)
+
+        to_create: list[str] = []
+        for path, t in self._pending_creates.items():
+            if now - t > self.DEBOUNCE_WINDOW:
+                if self.emit_event:
+                    self.emit_event(
+                        "created", self._pending_payloads.get(path, {"path": path})
+                    )
+                to_create.append(path)
+        for path in to_create:
+            del self._pending_creates[path]
+            self._pending_payloads.pop(path, None)
