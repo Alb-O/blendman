@@ -1,19 +1,33 @@
+# pylint: disable=redefined-outer-name
+
 """
 Unit tests for RelationsClient (link/unlink) in relations.py.
 """
 
-import pytest
 from unittest.mock import patch, MagicMock
+import pytest
 from pocketbase.relations import RelationsClient
 from pocketbase.exceptions import PocketBaseError
 
 
 @pytest.fixture
 def client() -> RelationsClient:
+    """
+    Pytest fixture for providing a test client instance.
+
+    Yields:
+        Any: The test client instance.
+    """
     return RelationsClient(token="test-token")
 
 
 def test_link_expected(client: RelationsClient) -> None:
+    """
+    Test the link function for expected behavior.
+
+    Args:
+        client: The test client fixture.
+    """
     with patch("pocketbase.relations.requests.patch") as mock_patch:
         mock_resp = MagicMock()
         mock_resp.status_code = 200
@@ -25,6 +39,12 @@ def test_link_expected(client: RelationsClient) -> None:
 
 
 def test_link_invalid_args(client: RelationsClient) -> None:
+    """
+    Test the link function with invalid arguments to ensure proper error handling.
+
+    Args:
+        client (RelationsClient): The test client fixture.
+    """
     with pytest.raises(ValueError):
         client.link("", "abc", "friends", "def")
     with pytest.raises(ValueError):
@@ -36,6 +56,12 @@ def test_link_invalid_args(client: RelationsClient) -> None:
 
 
 def test_link_api_error(client: RelationsClient) -> None:
+    """
+    Test the link function to ensure API errors are handled correctly.
+
+    Args:
+        client (RelationsClient): The test client fixture.
+    """
     with patch("pocketbase.relations.requests.patch") as mock_patch:
         mock_resp = MagicMock()
         mock_resp.status_code = 400
@@ -46,6 +72,12 @@ def test_link_api_error(client: RelationsClient) -> None:
 
 
 def test_unlink_expected(client: RelationsClient) -> None:
+    """
+    Test the unlink function for expected behavior.
+
+    Args:
+        client: The test client fixture.
+    """
     with (
         patch("pocketbase.relations.requests.get") as mock_get,
         patch("pocketbase.relations.requests.patch") as mock_patch,
@@ -65,6 +97,12 @@ def test_unlink_expected(client: RelationsClient) -> None:
 
 
 def test_unlink_invalid_args(client: RelationsClient) -> None:
+    """
+    Test the unlink function with invalid arguments to ensure proper error handling.
+
+    Args:
+        client (RelationsClient): The test client fixture.
+    """
     with pytest.raises(ValueError):
         client.unlink("", "abc", "friends", "def")
     with pytest.raises(ValueError):
@@ -76,6 +114,12 @@ def test_unlink_invalid_args(client: RelationsClient) -> None:
 
 
 def test_unlink_api_error(client: RelationsClient) -> None:
+    """
+    Test the unlink function to ensure API errors are handled correctly.
+
+    Args:
+        client (RelationsClient): The test client fixture.
+    """
     with patch("pocketbase.relations.requests.get") as mock_get:
         mock_get_resp = MagicMock()
         mock_get_resp.status_code = 400
@@ -101,6 +145,12 @@ def test_unlink_api_error(client: RelationsClient) -> None:
 
 
 def test_unlink_relation_not_list(client: RelationsClient) -> None:
+    """
+    Test the unlink function when the relation is not a list to ensure correct error handling.
+
+    Args:
+        client (RelationsClient): The test client fixture.
+    """
     with patch("pocketbase.relations.requests.get") as mock_get:
         mock_get_resp = MagicMock()
         mock_get_resp.status_code = 200

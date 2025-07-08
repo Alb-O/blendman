@@ -2,6 +2,7 @@
 File upload and download for PocketBase.
 """
 
+# pylint: disable=too-few-public-methods
 from typing import Any
 
 

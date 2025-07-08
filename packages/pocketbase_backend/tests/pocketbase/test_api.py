@@ -1,17 +1,16 @@
-# type: ignore
-
 """
 Tests for api.py (PocketBaseAPI composition and env loading).
 """
 
-import pytest
 import sys  # type: ignore
 import os  # type: ignore
+import pytest
+from pocketbase.api import PocketBaseAPI  # type: ignore
 
+# sys.path modification is required for local import resolution in test runner environments.
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src"))
 )  # type: ignore
-from pocketbase.api import PocketBaseAPI  # type: ignore
 
 
 def test_api_composes_subclients():

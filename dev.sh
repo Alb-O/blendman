@@ -92,6 +92,15 @@ for SRC_DIR in $SRC_ROOTS; do
   fi
 done
 
+# Dynamically discover all package src/tests pairs and run pytest with correct PYTHONPATH
+for SRC_DIR in $(find ./packages -type d -path "*/src" | grep -v "/\\." | grep -v ".mypy_cache" | grep -v "__pycache__" | grep -v "/\.[^/]*$"); do
+  PKG_DIR=$(dirname "$SRC_DIR")
+  TEST_DIR="$PKG_DIR/tests"
+  if [ -d "$TEST_DIR" ]; then
+    printf "%b\n" "${YELLOW}Running pytest for $TEST_DIR with PYTHONPATH=$SRC_DIR ...${NC}"
+    PYTHONPATH="$SRC_DIR" uv run pytest "$TEST_DIR"
+  fi
+done
 
 printf "%b\n" "${GREEN}All mypy checks passed!${NC}"
 
@@ -118,12 +127,10 @@ if [ -z "$PY_FILES" ]; then
   printf "%b\n" "${YELLOW}No Python files found for pylint.${NC}"
 else
   printf "%b\n" "${YELLOW}PYTHONPATH for pylint: $PYTHONPATH${NC}"
-  if PYTHONPATH="$PYTHONPATH" pylint --output-format=colorized $PY_FILES; then
+  if PYTHONPATH="$PYTHONPATH" uv run pylint --output-format=colorized $PY_FILES; then
     printf "%b\n" "${GREEN}Pylint checks passed!${NC}"
   else
     printf "%b\n" "${RED}Pylint checks failed!${NC}"
     exit 1
   fi
 fi
-
-uv run pytest

@@ -26,10 +26,14 @@ class Watcher:
         """
         Start watching the directory.
         """
-        pass
+        raise NotImplementedError(
+            "Watcher.start() must be implemented by subclasses or completed."
+        )
 
     def stop(self) -> None:
         """
         Stop watching the directory.
         """
-        pass
+        raise NotImplementedError(
+            "Watcher.stop() must be implemented by subclasses or completed."
+        )

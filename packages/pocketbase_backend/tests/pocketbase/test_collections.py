@@ -2,8 +2,8 @@
 Tests for CollectionsClient in collections.py.
 """
 
-import pytest
 from unittest.mock import patch, MagicMock
+import pytest
 from pocketbase.collections import CollectionsClient
 from pocketbase.exceptions import PocketBaseError
 

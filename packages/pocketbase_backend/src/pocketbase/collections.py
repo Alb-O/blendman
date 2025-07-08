@@ -3,39 +3,15 @@ CRUD and query operations for PocketBase collections.
 """
 
 from typing import Any, Optional
-import os
 import requests  # type: ignore
 from .exceptions import PocketBaseError
-from .utils import load_env
+from .base_client import BaseClient
 
 
-class CollectionsClient:
+class CollectionsClient(BaseClient):
     """
     Handles CRUD and query for PocketBase collections.
     """
-
-    def __init__(self, token: Optional[str] = None) -> None:
-        """
-        Initializes the CollectionsClient, loads env, and sets up state.
-
-        Args:
-            token (Optional[str]): Auth token, if available.
-        """
-        load_env()
-        self.base_url: str = os.environ.get("POCKETBASE_URL", "http://127.0.0.1:8090")
-        self.token: Optional[str] = token
-
-    def _headers(self) -> dict[str, str]:
-        """
-        Returns headers for requests, including Authorization if token is set.
-
-        Returns:
-            dict[str, str]: HTTP headers.
-        """
-        headers = {"Content-Type": "application/json"}
-        if self.token:
-            headers["Authorization"] = self.token
-        return headers
 
     def create(self, collection: str, data: dict[str, Any]) -> dict[str, Any]:
         """

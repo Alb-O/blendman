@@ -9,10 +9,12 @@ Usage:
     pb.stop()
 """
 
+# pylint: disable=consider-using-with
 import subprocess
 import os
 import time
 from typing import Optional
+import argparse
 
 
 class PocketBaseManager:
@@ -67,7 +69,6 @@ def main():
     """
     CLI entry point for starting/stopping PocketBase server.
     """
-    import argparse
 
     parser = argparse.ArgumentParser(description="Manage PocketBase server.")
     parser.add_argument(

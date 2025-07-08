@@ -31,12 +31,13 @@ def test_on_event_callback() -> None:
 
     def cb(event: object) -> None:
         called["event"] = event
-        raise Exception("fail")
+        raise Exception("fail")  # pylint: disable=broad-exception-raised
 
     w = Watcher("/tmp", on_event=cb)
     try:
         assert w.on_event is not None
         w.on_event({"type": "test"})
-    except Exception:
+    except Exception:  # pylint: disable=broad-exception-caught
+        # In test context, broad exception is justified to catch all errors
         pass
     assert called["event"] == {"type": "test"}

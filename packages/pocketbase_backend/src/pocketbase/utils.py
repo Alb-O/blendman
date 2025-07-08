@@ -2,8 +2,9 @@
 Utility functions for PocketBase API.
 """
 
-from dotenv import load_dotenv  # type: ignore
+import os
 from typing import Callable, TypeVar
+from dotenv import load_dotenv  # type: ignore
 
 
 def load_env(dotenv_path: str | None = None) -> None:
@@ -24,10 +25,12 @@ def load_env(dotenv_path: str | None = None) -> None:
 
 def load_envs(dotenv_paths: list[str] | None = None) -> None:
     """
-    Loads environment variables from multiple .env files in order. Later files override earlier ones.
+    Loads environment variables from multiple .env files in order.
+    Later files override earlier ones.
 
     Args:
-        dotenv_paths (list[str] | None): List of dotenv file paths to load. If None, loads default .env.
+        dotenv_paths (list[str] | None): List of dotenv file paths to load.
+            If None, loads default .env.
 
     Returns:
         None
@@ -50,8 +53,6 @@ def get_env_var(key: str, default: str | None = None) -> str | None:
     Returns:
         str | None: The value of the environment variable, or default if not set.
     """
-    import os
-
     return os.environ.get(key, default)
 
 
@@ -81,8 +82,6 @@ def get_env_var_typed(
         ValueError: If required is True and the variable is missing.
         ValueError: If casting fails.
     """
-    import os
-
     val = os.environ.get(key)
     if val is None:
         if required:
@@ -93,7 +92,7 @@ def get_env_var_typed(
     except Exception as e:
         raise ValueError(
             f"Failed to cast environment variable '{key}' to {cast_type}: {e}"
-        )
+        ) from e
 
 
 def require_env_var(key: str) -> str:
@@ -109,8 +108,6 @@ def require_env_var(key: str) -> str:
     Raises:
         ValueError: If the variable is missing.
     """
-    import os
-
     val = os.environ.get(key)
     if val is None:
         raise ValueError(f"Required environment variable '{key}' is missing.")

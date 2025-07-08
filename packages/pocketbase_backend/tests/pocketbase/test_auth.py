@@ -2,8 +2,9 @@
 Tests for AuthClient in auth.py.
 """
 
-import pytest
 from unittest.mock import patch, MagicMock
+import pytest
+import requests  # type: ignore
 from pocketbase.auth import AuthClient
 from pocketbase.exceptions import PocketBaseError
 
@@ -42,7 +43,6 @@ def test_login_http_error():
     Test login failure due to network error (requests.RequestException).
     """
     client = AuthClient()
-    import requests  # type: ignore
 
     with patch(
         "pocketbase.auth.requests.post",

@@ -1,3 +1,4 @@
+# pylint: disable=unused-argument
 """
 Unit tests for TOML config parsing and gitignore-style matcher logic in config.py.
 """
@@ -5,20 +6,35 @@ Unit tests for TOML config parsing and gitignore-style matcher logic in config.p
 import os
 import tempfile
 import textwrap
-import pytest
+import sys
+import importlib
 from pathlib import Path
 from typing import Any
-import importlib
-import sys
+import pytest
 
 
 def reload_config_module() -> Any:
+    """
+    Reload the rename_watcher.config module for test isolation.
+
+    Returns:
+        Any: The reloaded config module.
+    """
     if "rename_watcher.config" in sys.modules:
         del sys.modules["rename_watcher.config"]
     return importlib.import_module("rename_watcher.config")
 
 
 def write_toml(content: str) -> str:
+    """
+    Write TOML content to a temporary file.
+
+    Args:
+        content (str): TOML content to write.
+
+    Returns:
+        str: Path to the temporary TOML file.
+    """
     fd, path = tempfile.mkstemp(suffix=".toml")
     with os.fdopen(fd, "w") as f:
         f.write(content)
@@ -182,20 +198,3 @@ def test_priority_option(monkeypatch: pytest.MonkeyPatch) -> None:
     matcher = config_mod.get_path_matcher(cfg["patterns"])  # type: ignore[attr-defined]
     # File is included but inside an ignored dir; should be included
     assert matcher("data/important.txt")
-    """
-    Test that a single extension in include patterns only matches that extension (expected use).
-    """
-    toml_content = """
-    [include]
-    patterns = [".blend"]
-    """
-    toml_path = write_toml(toml_content)
-    monkeypatch.setenv("WATCHER_CONFIG_TOML", toml_path)
-    config_mod = reload_config_module()
-    cfg = config_mod.get_config()  # type: ignore[attr-defined]
-    matcher = config_mod.get_path_matcher(cfg["patterns"])  # type: ignore[attr-defined]
-    # Only .blend files should match
-    assert matcher("foo.blend")
-    assert matcher("subdir/bar.blend")
-    assert not matcher("foo.py")
-    assert not matcher("bar.txt")

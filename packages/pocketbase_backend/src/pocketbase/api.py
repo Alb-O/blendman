@@ -2,6 +2,13 @@
 Main API client for interacting with PocketBase REST API.
 """
 
+# pylint: disable=too-few-public-methods
+from .utils import load_env
+from .auth import AuthClient
+from .collections import CollectionsClient
+from .files import FilesClient
+from .relations import RelationsClient
+
 
 class PocketBaseAPI:
     """
@@ -9,13 +16,6 @@ class PocketBaseAPI:
     """
 
     def __init__(self):
-        # Import here for testability and monkeypatching
-        from .utils import load_env
-        from .auth import AuthClient
-        from .collections import CollectionsClient
-        from .files import FilesClient
-        from .relations import RelationsClient
-
         load_env()
         self.auth = AuthClient()
         self.collections = CollectionsClient()

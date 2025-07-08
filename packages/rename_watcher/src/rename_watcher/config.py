@@ -4,8 +4,8 @@ Configuration and environment loading for rename_watcher.
 
 import os
 import pathlib
-from dotenv import load_dotenv
 from typing import Dict, Any, Callable
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -35,7 +35,7 @@ def get_toml_config() -> Dict[str, Any]:
     try:
         with open(config_path, "rb") as f:
             return tomli.load(f)
-    except Exception:
+    except (OSError, tomli.TOMLDecodeError):  # Only catch file/parse errors
         # Fallback to empty config if TOML is invalid
         return {}
 
@@ -153,8 +153,8 @@ def get_config() -> Dict[str, Any]:
     else:
         patterns = get_env_patterns()
     return {
-        "timeout": float(os.getenv("WATCHER_TIMEOUT", 2.0)),
-        "poll_interval": float(os.getenv("WATCHER_POLL_INTERVAL", 1.0)),
+        "timeout": float(os.getenv("WATCHER_TIMEOUT", "2.0")),
+        "poll_interval": float(os.getenv("WATCHER_POLL_INTERVAL", "1.0")),
         "patterns": patterns,
         "matcher": get_path_matcher(patterns),
         "priority": patterns.get("priority", "ignore"),

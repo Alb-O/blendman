@@ -55,7 +55,8 @@ def test_move_folder_path_and_name_change() -> None:
 
 def test_move_folder_with_ignored_files() -> None:
     """
-    Test moving a folder with a mix of included and ignored files (simulate by not adding ignored files to path map).
+    Test moving a folder with a mix of included and ignored files
+        (simulate by not adding ignored files to path map).
     """
     pm = PathInodeMap()
     pm.add("/root/folder", 1)
@@ -156,7 +157,7 @@ def test_process_invalid_event() -> None:
     ep = EventProcessor(pm)
     try:
         ep.process({"type": "unknown", "path": "bad.txt"})
-    except Exception:
+    except Exception:  # pylint: disable=broad-exception-caught
         pass  # Should not crash
 
 

@@ -42,13 +42,14 @@ def test_subscribe_multiple() -> None:
 
     def cb2(event: object) -> None:
         received2.append(event)
-        raise Exception("fail")
+        raise Exception("fail")  # pylint: disable=broad-exception-raised
 
     api.subscribe(cb1)
     api.subscribe(cb2)
     try:
         api.emit({"type": "move", "src": "a.txt", "dst": "b.txt"})
-    except Exception:
+    except Exception:  # pylint: disable=broad-exception-caught
+        # In test context, broad exception is justified to catch all errors
         pass
     assert received1 == [{"type": "move", "src": "a.txt", "dst": "b.txt"}]
     assert received2 == [{"type": "move", "src": "a.txt", "dst": "b.txt"}]
