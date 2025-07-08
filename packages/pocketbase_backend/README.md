@@ -1,44 +1,61 @@
-PocketBase Integration
-======================
-
-This project uses [PocketBase](https://pocketbase.io/) as a backend service. PocketBase is a Go application, not a Python library, so it is bundled as a binary in `packages/pocketbase/` and managed from Python.
-
-
-Setup
------
-1. The PocketBase binary is located in `packages/pocketbase/pocketbase`.
-2. If you need to update or re-extract the binary, run:
-
-    cd packages/pocketbase
-    python3 extract_pocketbase.py
-
-
-3. To start/stop PocketBase from the command line using uv, run:
-
-    uv run pocketbase-manager start
-
-   To stop (if running in the background or another terminal):
-
-    uv run pocketbase-manager stop
-
-   You can also specify a port:
-
-    uv run pocketbase-manager start --port 8091
-
-4. To start/stop PocketBase from Python, use the `PocketBaseManager` class:
-
-```python
-from packages.pocketbase.pocketbase_manager import PocketBaseManager
-pb = PocketBaseManager()
 pb.start()
 # ... interact with PocketBase at http://127.0.0.1:8090 ...
 pb.stop()
+
+# PocketBase Python API Client
+
+This package provides a modular Python API client for [PocketBase](https://pocketbase.io/) using its REST API.
+
+## Setup
+
+1. Copy `.env.example` to `.env` and fill in your PocketBase server details:
+
+    cp .env.example .env
+
+2. Install dependencies (in your uv workspace):
+
+    uv pip install -r requirements.txt
+
+3. Run validation gates:
+
+    uv run ruff check .
+    uv run ruff format .
+    ./mypy_recursive.sh
+    uv run pytest
+
+## Environment Variables
+
+See `.env.example` for required variables:
+
+    POCKETBASE_URL=http://127.0.0.1:8090
+    POCKETBASE_ADMIN_EMAIL=admin@example.com
+    POCKETBASE_ADMIN_PASSWORD=changeme
+
+## Usage Example
+
+```python
+from pocketbase.api import PocketBaseAPI
+
+api = PocketBaseAPI()
+
+# Auth
+api.auth.login(email="admin@example.com", password="changeme")
+
+# CRUD
+record = api.collections.create("users", {"username": "alice"})
+user = api.collections.get("users", record["id"])
+
+# Relations
+api.relations.link("users", user["id"], "friends", "other_user_id")
+
+# Files
+# api.files.upload(...)
+
+# Logout
+api.auth.logout()
 ```
 
-5. Interact with PocketBase using its REST API (e.g., with the `requests` library).
-
-Notes
------
-- The PocketBase server will create `pb_data` and `pb_migrations` directories in the same folder as the binary.
+## Notes
+- All API errors are wrapped in custom exceptions (see `exceptions.py`).
+- All HTTP requests in tests are mocked; no real PocketBase server is required for unit tests.
 - For more information, see the [PocketBase documentation](https://pocketbase.io/docs/).
-- If you need to automate binary updates, consider scripting the download and extraction process.

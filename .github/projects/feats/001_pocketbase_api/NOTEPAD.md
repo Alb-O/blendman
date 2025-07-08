@@ -13,11 +13,11 @@
   - test_collections.py covers all methods (expected, edge, failure), all tests pass.
   - All validation gates (ruff, mypy, pytest) clean for collections.
   - Next: Implement files.py (upload/download)
-- [ ] Step 6: Implement relations.py (link/unlink)
-- [ ] Step 7: Implement exceptions.py (custom errors)
-- [ ] Step 8: Implement utils.py (env, helpers)
-- [ ] Step 10: Add .env.example and update README with setup/usage
-- [ ] Step 12: Mark completed tasks in NOTEPAD.md and finalize
+- [x] Step 6: Implement relations.py (link/unlink)
+- [x] Step 7: Implement exceptions.py (custom errors)
+- [x] Step 8: Implement utils.py (env, helpers)
+- [x] Step 10: Add .env.example and update README with setup/usage
+- [x] Step 12: Mark completed tasks in NOTEPAD.md and finalize
 
 ### Planning Notes
 - All modules must be under 500 lines; refactor if needed.
@@ -54,3 +54,4 @@
 - 2025-07-08: NOTEPAD.md updated, initial plan and todo list added.
 - 2025-07-08: Steps 1 and 2 complete, api.py and tests validated, all type/lint/test gates clean.
 - 2025-07-08: Steps 3–5 complete, auth.py implemented and validated with tests, all gates clean.
+- 2025-07-08: Steps 6–8, 10, 12 complete: relations.py, exceptions.py, utils.py, .env.example, README updated, all validation gates clean.
