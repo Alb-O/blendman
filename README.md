@@ -10,10 +10,19 @@ This project uses [uv workspaces](https://docs.astral.sh/uv/concepts/projects/wo
 
 ## Workflow
 
+
 ### Install all dependencies (including dev tools)
 
 ```sh
 uv pip install -e .
+```
+
+### Unified development check (lint, type-check, test)
+
+Run all validation steps with one command:
+
+```sh
+./dev.sh
 ```
 
 ### Run the PocketBase manager CLI
@@ -22,13 +31,27 @@ uv pip install -e .
 uv run --package pocketbase pocketbase-manager start --port 8090
 ```
 
+### Add a new package
 
-### Lint and type-check the entire workspace
+- Create a new directory under `packages/` with its own `pyproject.toml` and `src/`.
+- Add it to the `members` list in the root `pyproject.toml` if not using a glob.
+
+## Automation & CI
+
+### Pre-commit hooks
+
+Install and enable pre-commit hooks to automatically lint, type-check, and test before every commit:
 
 ```sh
-uv run ruff check .
-./mypy_recursive.sh
+pip install pre-commit
+pre-commit install
 ```
+
+### Continuous Integration (GitHub Actions)
+
+This repo includes `.github/workflows/ci.yml` to run lint, type-check, and tests on every push/PR.
+
+---
 
 ### Add a new package
 
@@ -40,5 +63,9 @@ uv run ruff check .
 - Use `[tool.uv.sources]` for local package dependencies.
 - Keep dev tools (ruff, mypy, pytest, etc.) in the root dependencies for workspace-wide use.
 - Use `uv run` and `uv pip` from the workspace root for all operations.
+
+---
+
+See [uv workspace docs](https://docs.astral.sh/uv/concepts/projects/workspaces/) for more details.
 
 See [uv workspace docs](https://docs.astral.sh/uv/concepts/projects/workspaces/) for more details.

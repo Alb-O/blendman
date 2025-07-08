@@ -1,7 +1,11 @@
-#!/bin/sh
-# Robust mypy workflow for src-layout Python project (procedural)
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
+uv run ruff format .
+uv run ruff check . --fix
+uv run ruff check .
+
+set -e
 
 RED="\033[0;31m"
 GREEN="\033[0;32m"
@@ -11,7 +15,6 @@ NC="\033[0m" # No Color
 command -v uv >/dev/null 2>&1 || { echo "${RED}Error: 'uv' is not installed. Aborting.${NC}" >&2; exit 1; }
 uv run mypy --version >/dev/null 2>&1 || { echo "${RED}Error: 'mypy' is not installed in uv environment. Aborting.${NC}" >&2; exit 1; }
 
-printf "%b\n" "${YELLOW}Type checking main source code: $SRC_DIR ...${NC}"
 
 
 # Find all src/* package roots (e.g. packages/*/src/*) that contain __init__.py
@@ -57,3 +60,5 @@ for SRC_DIR in $SRC_ROOTS; do
 done
 
 printf "%b\n" "${GREEN}All mypy checks passed!${NC}"
+
+uv run pytest

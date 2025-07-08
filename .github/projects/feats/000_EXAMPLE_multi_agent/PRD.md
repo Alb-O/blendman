@@ -289,10 +289,8 @@ DEPENDENCIES:
 
 ### Level 1: Syntax & Style
 ```bash
-# Run these FIRST - fix any errors before proceeding
-ruff check .
-ruff format .
-./mypy_recursive.sh
+# Run this FIRST - fix any errors before proceeding
+./dev.sh
 
 # Expected: No errors or warnings. If errors/warnings, fix it immediately.
 ```
@@ -359,9 +357,7 @@ uv run python cli.py
 
 
 ## Final Validation Checklist (Agent Self-Validation)
-- [ ] All tests pass: `uv run pytest tests/ -v`
-- [ ] No linting errors: `ruff check .`
-- [ ] No type errors: `./mypy_recursive.sh`
+- [ ] All tests pass, no linting errors, no type errors: `./dev.sh`
 - [ ] Gmail OAuth flow works (browser opens, token saved)
 - [ ] Brave Search returns results
 - [ ] Research Agent invokes Email Agent successfully

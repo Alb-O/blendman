@@ -10,18 +10,15 @@ This package provides a modular Python API client for [PocketBase](https://pocke
 
 1. Copy `.env.example` to `.env` and fill in your PocketBase server details:
 
-    cp .env.example .env
+    `cp .env.example .env`
 
 2. Install dependencies (in your uv workspace):
 
-    uv pip install -r requirements.txt
+    `uv sync`
 
 3. Run validation gates:
 
-    uv run ruff check .
-    uv run ruff format .
-    ./mypy_recursive.sh
-    uv run pytest
+    `./dev.sh`
 
 ## Environment Variables
 

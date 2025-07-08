@@ -90,12 +90,8 @@ Implement a comprehensive, production-grade Python API system for PocketBase, us
 
 ### Validation Gates
 ```bash
-uv pip install -r requirements.txt  # or use pyproject.toml
-uv venv
-uv run ruff check .
-uv run ruff format .
-./mypy_recursive.sh
-uv run pytest
+uv sync
+./dev.sh
 ```
 
 ---
