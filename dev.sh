@@ -15,7 +15,40 @@ NC="\033[0m" # No Color
 command -v uv >/dev/null 2>&1 || { echo "${RED}Error: 'uv' is not installed. Aborting.${NC}" >&2; exit 1; }
 uv run mypy --version >/dev/null 2>&1 || { echo "${RED}Error: 'mypy' is not installed in uv environment. Aborting.${NC}" >&2; exit 1; }
 
+if [ "${1-}" = "--pylint" ]; then
+  YELLOW="\033[1;33m"
+  GREEN="\033[0;32m"
+  RED="\033[0;31m"
+  NC="\033[0m"
+  printf "%b\n" "${YELLOW}Running pylint only (--pylint mode)...${NC}"
+  # Extract extraPaths from .vscode/settings.json (assumes jq is installed)
+  if ! command -v jq >/dev/null 2>&1; then
+    printf "%b\n" "${RED}Error: 'jq' is required to parse .vscode/settings.json. Aborting.${NC}"
+    exit 1
+  fi
 
+  EXTRA_PATHS=$(jq -r '."python.analysis.extraPaths"[]?' .vscode/settings.json 2>/dev/null | xargs)
+  PYTHONPATH=""
+  for p in $EXTRA_PATHS; do
+    PYTHONPATH="$PYTHONPATH:$(realpath "$p")"
+  done
+  PYTHONPATH=${PYTHONPATH#:} # Remove leading colon
+
+  PY_FILES=$(git ls-files '*.py'; git ls-files --others --exclude-standard '*.py')
+
+  if [ -z "$PY_FILES" ]; then
+    printf "%b\n" "${YELLOW}No Python files found for pylint.${NC}"
+  else
+    printf "%b\n" "${YELLOW}PYTHONPATH for pylint: $PYTHONPATH${NC}"
+    if PYTHONPATH="$PYTHONPATH" uv run pylint --output-format=colorized $PY_FILES; then
+      printf "%b\n" "${GREEN}Pylint checks passed!${NC}"
+    else
+      printf "%b\n" "${RED}Pylint checks failed!${NC}"
+      exit 1
+    fi
+  fi
+  exit 0
+fi
 
 # Find all src/* package roots (e.g. packages/*/src/*) that contain __init__.py
 SRC_ROOTS=""
@@ -59,6 +92,38 @@ for SRC_DIR in $SRC_ROOTS; do
   fi
 done
 
+
 printf "%b\n" "${GREEN}All mypy checks passed!${NC}"
+
+# --- Pylint section: use python.analysis.extraPaths for PYTHONPATH ---
+printf "%b\n" "${YELLOW}Running pylint with VSCode extraPaths...${NC}"
+
+# Extract extraPaths from .vscode/settings.json (assumes jq is installed)
+if ! command -v jq >/dev/null 2>&1; then
+  printf "%b\n" "${RED}Error: 'jq' is required to parse .vscode/settings.json. Aborting.${NC}"
+  exit 1
+fi
+
+EXTRA_PATHS=$(jq -r '."python.analysis.extraPaths"[]?' .vscode/settings.json 2>/dev/null | xargs)
+PYTHONPATH=""
+for p in $EXTRA_PATHS; do
+  PYTHONPATH="$PYTHONPATH:$(realpath "$p")"
+done
+PYTHONPATH=${PYTHONPATH#:} # Remove leading colon
+
+# Find all Python files tracked by git (including untracked, not ignored)
+PY_FILES=$(git ls-files '*.py'; git ls-files --others --exclude-standard '*.py')
+
+if [ -z "$PY_FILES" ]; then
+  printf "%b\n" "${YELLOW}No Python files found for pylint.${NC}"
+else
+  printf "%b\n" "${YELLOW}PYTHONPATH for pylint: $PYTHONPATH${NC}"
+  if PYTHONPATH="$PYTHONPATH" pylint --output-format=colorized $PY_FILES; then
+    printf "%b\n" "${GREEN}Pylint checks passed!${NC}"
+  else
+    printf "%b\n" "${RED}Pylint checks failed!${NC}"
+    exit 1
+  fi
+fi
 
 uv run pytest

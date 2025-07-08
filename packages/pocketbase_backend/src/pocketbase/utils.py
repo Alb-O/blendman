@@ -70,7 +70,8 @@ def get_env_var_typed(
     Args:
         key (str): The environment variable name.
         default (T | None): Default value if not set.
-        cast_type (Callable[[str], T]): Function to cast the string value to desired type (e.g., int, bool).
+        cast_type (Callable[[str], T]): Function to cast the string value to desired type
+            (e.g., int, bool).
         required (bool): If True, raises ValueError if the variable is missing.
 
     Returns:

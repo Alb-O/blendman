@@ -11,8 +11,6 @@ class PocketBaseError(Exception):
         message (str): Error message.
     """
 
-    pass
-
 
 class PocketBaseAuthError(PocketBaseError):
     """
@@ -21,8 +19,6 @@ class PocketBaseAuthError(PocketBaseError):
     Args:
         message (str): Error message.
     """
-
-    pass
 
 
 class PocketBaseNotFoundError(PocketBaseError):
@@ -33,8 +29,6 @@ class PocketBaseNotFoundError(PocketBaseError):
         message (str): Error message.
     """
 
-    pass
-
 
 class PocketBaseValidationError(PocketBaseError):
     """
@@ -44,8 +38,6 @@ class PocketBaseValidationError(PocketBaseError):
         message (str): Error message.
     """
 
-    pass
-
 
 class PocketBaseServerError(PocketBaseError):
     """
@@ -54,5 +46,3 @@ class PocketBaseServerError(PocketBaseError):
     Args:
         message (str): Error message.
     """
-
-    pass

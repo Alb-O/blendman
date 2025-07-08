@@ -102,7 +102,8 @@ def test_invalid_toml(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     toml_path = write_toml("not a toml file!")
     monkeypatch.setenv("WATCHER_CONFIG_TOML", toml_path)
-    # If the config loader returns defaults or logs instead of raising, just check it returns a config dict
+    # If the config loader returns defaults or logs instead of raising,
+    # just check it returns a config dict
     cfg = reload_config_module().get_config()  # type: ignore[attr-defined]
     assert isinstance(cfg, dict)
 
