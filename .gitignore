@@ -1,3 +1,5 @@
+# PocketBase binary (should not be tracked)
+packages/pocketbase_backend/pocketbase_bin
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
