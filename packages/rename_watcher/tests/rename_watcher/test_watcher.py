@@ -22,16 +22,15 @@ def test_init() -> None:
 
 def test_start_stop() -> None:
     """
-    Test start and stop methods raise NotImplementedError on base class (edge case).
+    Test start and stop methods do not raise on base class (edge case).
     """
-    import pytest  # type: ignore
-
     with tempfile.TemporaryDirectory() as tmpdir:
         w = Watcher(tmpdir)
-        with pytest.raises(NotImplementedError):
+        try:
             w.start()
-        with pytest.raises(NotImplementedError):
             w.stop()
+        except Exception as e:
+            assert False, f"start/stop raised unexpected exception: {e}"
 
 
 def test_on_event_callback() -> None:
