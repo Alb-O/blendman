@@ -24,7 +24,7 @@ def test_start_stop() -> None:
     """
     Test start and stop methods raise NotImplementedError on base class (edge case).
     """
-    import pytest # type: ignore
+    import pytest  # type: ignore
 
     with tempfile.TemporaryDirectory() as tmpdir:
         w = Watcher(tmpdir)
