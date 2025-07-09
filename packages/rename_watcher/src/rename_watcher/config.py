@@ -67,12 +67,10 @@ def get_env_patterns() -> Dict[str, Any]:
     Returns:
         Dict[str, List[str]]: Dict with 'include' and 'ignore' pattern lists.
     """
-    ignore = os.getenv("WATCHER_IGNORE_PATTERNS", ".git,.env").split(",")
-    include = (
-        os.getenv("WATCHER_INCLUDE_PATTERNS", "").split(",")
-        if os.getenv("WATCHER_INCLUDE_PATTERNS")
-        else []
-    )
+    ignore_raw = os.getenv("WATCHER_IGNORE_PATTERNS", ".git,.env")
+    ignore = [p for p in ignore_raw.split(",") if p.strip()]
+    include_raw = os.getenv("WATCHER_INCLUDE_PATTERNS", "")
+    include = [p for p in include_raw.split(",") if p.strip()] if include_raw else []
     # Default to ignore priority for env config
     return {"include": include, "ignore": ignore, "priority": "ignore"}
 

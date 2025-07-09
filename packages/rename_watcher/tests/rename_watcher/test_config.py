@@ -10,7 +10,7 @@ import sys
 import importlib
 from pathlib import Path
 from typing import Any
-import pytest
+import pytest # type: ignore
 
 
 def reload_config_module() -> Any:
@@ -71,10 +71,12 @@ def test_toml_config_parsing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
     ]
 
 
-def test_env_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_env_fallback(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """
     Test fallback to environment variables if TOML config is missing (edge case).
     """
+    # Change to a temp directory with no blendman_config.toml
+    monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("BLENDMAN_CONFIG_TOML", raising=False)
     monkeypatch.setenv("WATCHER_IGNORE_PATTERNS", ".git,.env,.cache")
     config_mod = reload_config_module()
