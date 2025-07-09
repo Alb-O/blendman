@@ -4,6 +4,7 @@ packages/pocketbase_backend/pocketbase_bin*
 # Generated config files
 blendman_config.toml
 
+# PID files
 *.pid
 
 # PocketBase generated files

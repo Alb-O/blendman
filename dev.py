@@ -127,6 +127,9 @@ def run_checks() -> None:
             run_cmd(["uv", "run", "mypy", str(test_dir)], env=env)
 
     for src_dir in Path("packages").rglob("src"):
+        # Skip src directories inside hidden directories (e.g., .mypy_cache)
+        if any(part.startswith(".") for part in src_dir.parts):
+            continue
         pkg_dir = src_dir.parent
         test_dir = pkg_dir / "tests"
         if test_dir.is_dir():
