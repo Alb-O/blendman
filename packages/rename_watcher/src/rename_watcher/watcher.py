@@ -137,8 +137,7 @@ class Watcher:
         self._event_processor.process(event)
 
     def _emit_high_level(self, event_type: str, payload: dict):
-        payload = dict(payload)
-        payload["type"] = event_type
-        print(f"[Watcher] Emitting high-level event: {payload}")
-        if self.on_event:
-            self.on_event(payload)
+        # This method is only used as a callback for EventProcessor in legacy/test cases.
+        # In production, high-level event emission should be handled by RenameWatcherAPI._emit_high_level only.
+        # Do not emit or print here. All high-level event routing must go through the API for correct subscriber delivery.
+        pass

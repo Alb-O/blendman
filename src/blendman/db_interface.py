@@ -7,7 +7,7 @@ Exposes APIs for persisting and querying file/dir state and rename logs.
 from typing import List, Optional
 from packages.pocketbase_backend.src.pocketbase.api import PocketBaseAPI
 from packages.pocketbase_backend.src.pocketbase.auth import AuthClient
-import logging
+import structlog
 import os
 
 
@@ -17,7 +17,7 @@ class DBInterface:
     """
 
     def __init__(self):
-        self.logger = logging.getLogger("DBInterface")
+        self.logger = structlog.get_logger("DBInterface")
         self.auth_client = AuthClient()
         # Use admin credentials from env for initial login
         admin_email = os.environ.get("POCKETBASE_ADMIN_EMAIL")
@@ -45,12 +45,20 @@ class DBInterface:
                 "parent_id": event.get("parent_id"),
                 "type": event["type"],
             }
+            self.logger.info(f"[DBInterface] Creating file record: {file_data}")
             # Ensure token is valid before DB operation
             if not self.auth_client.get_token():
                 admin_email = os.environ.get("POCKETBASE_ADMIN_EMAIL")
                 admin_password = os.environ.get("POCKETBASE_ADMIN_PASSWORD")
                 self.auth_client.login(admin_email, admin_password)
-            file_record = self.api.collections.create("files", file_data)
+            try:
+                file_record = self.api.collections.create("files", file_data)
+                self.logger.info(f"[DBInterface] File record created: {file_record}")
+            except Exception as e:
+                self.logger.error(
+                    f"[DBInterface] File record creation failed: {file_data} | Error: {e}"
+                )
+                raise
             # Insert rename log
             log_data = {
                 "file_id": file_record["id"],
@@ -58,7 +66,15 @@ class DBInterface:
                 "new_path": event["new_path"],
                 "event_type": event["event_type"],
             }
-            self.api.collections.create("rename_logs", log_data)
+            self.logger.info(f"[DBInterface] Creating rename log: {log_data}")
+            try:
+                log_record = self.api.collections.create("rename_logs", log_data)
+                self.logger.info(f"[DBInterface] Rename log created: {log_record}")
+            except Exception as e:
+                self.logger.error(
+                    f"[DBInterface] Rename log creation failed: {log_data} | Error: {e}"
+                )
+                raise
         except Exception as e:
             self.logger.error(f"DB persist_event failed: {event} | Error: {e}")
 

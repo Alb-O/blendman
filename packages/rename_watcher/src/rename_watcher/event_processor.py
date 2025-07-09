@@ -52,11 +52,19 @@ class EventProcessor:
             event (Dict[str, Any]): Raw event from watcher. Must include 'type', 'src_path',
                 and optionally 'dest_path'.
         """
+        import structlog  # type: ignore
+        import os
+
+        log = structlog.get_logger("EventProcessor")
+        log.info("process called", pid=os.getpid(), event_data=event)
         event_type = event.get("type")
         src_path = event.get("src_path")
         dest_path = event.get("dest_path")
 
         if event_type in ("moved", "renamed") and src_path and dest_path:
+            log.info(
+                "process handling native move", src_path=src_path, dest_path=dest_path
+            )
             self._handle_native_move(src_path, dest_path)
             return
 
@@ -64,39 +72,49 @@ class EventProcessor:
 
         if event_type == "deleted" and src_path:
             if self._handle_deleted_event(src_path, now):
+                log.info("process handled deleted event", src_path=src_path)
                 return
 
         if event_type == "created" and src_path:
             if self._handle_created_event(src_path, now):
+                log.info("process handled created event", src_path=src_path)
                 return
 
         self._flush_pending_events(now)
 
     def _handle_native_move(self, src_path: str, dest_path: str) -> None:
+        import structlog  # type: ignore
+        import os
+
+        log = structlog.get_logger("EventProcessor")
+        log.info(
+            "_handle_native_move called",
+            pid=os.getpid(),
+            src_path=src_path,
+            dest_path=dest_path,
+        )
         self.path_map.bulk_update_paths(src_path, dest_path)
         descendants = self.path_map.descendants(dest_path)
         for path, inode in descendants.items():
             if self.emit_event:
-                self.emit_event(
-                    "moved",
-                    {
-                        "path": path,
-                        "inode": inode,
-                        "old_parent": src_path,
-                        "new_parent": dest_path,
-                    },
-                )
-        if self.emit_event:
-            folder_inode = self.path_map.get_inode(dest_path)
-            self.emit_event(
-                "moved",
-                {
-                    "path": dest_path,
-                    "inode": folder_inode,
+                payload = {
+                    "path": path,
+                    "inode": inode,
                     "old_parent": src_path,
                     "new_parent": dest_path,
-                },
-            )
+                }
+                log.info("_handle_native_move emitting descendant", payload=payload)
+                self.emit_event("moved", payload)
+        if self.emit_event:
+            folder_inode = self.path_map.get_inode(dest_path)
+            payload = {
+                "path": dest_path,
+                "inode": folder_inode,
+                "old_parent": src_path,
+                "new_parent": dest_path,
+            }
+            log.info("_handle_native_move emitting folder", payload=payload)
+            self.emit_event("moved", payload)
 
     def _handle_deleted_event(self, src_path: str, now: float) -> bool:
         self._pending_deletes[src_path] = now

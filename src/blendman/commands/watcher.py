@@ -6,6 +6,7 @@ import sys
 import os
 import typer  # type: ignore
 from rich.console import Console  # type: ignore
+import structlog
 
 import subprocess
 import platform
@@ -24,6 +25,30 @@ from rename_watcher.config import get_config
 from blendman.watcher_bridge import WatcherBridge
 from blendman.db_interface import DBInterface
 import time
+
+
+def setup_logging():
+    import logging
+
+    structlog.configure(
+        processors=[
+            structlog.processors.TimeStamper(fmt="iso"),
+            structlog.stdlib.add_log_level,
+            structlog.processors.StackInfoRenderer(),
+            structlog.processors.format_exc_info,
+            structlog.processors.JSONRenderer(),
+        ],
+        wrapper_class=structlog.stdlib.BoundLogger,
+        context_class=dict,
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        cache_logger_on_first_use=True,
+    )
+    logging.basicConfig(
+        format="%(message)s",
+        stream=sys.stdout,
+        level=logging.INFO,
+    )
+
 
 watcher_app = typer.Typer()
 console = Console()
@@ -83,6 +108,8 @@ def start(
     Recursively watches all subdirectories of the specified directory.
     Writes a PID file for process management.
     """
+    setup_logging()
+    log = structlog.get_logger("blendman.cli")
     console.print(f"[bold green]Starting watcher with config:[/] {config_path}")
     os.environ["BLENDMAN_CONFIG_TOML"] = config_path
     try:
@@ -96,6 +123,12 @@ def start(
         # Write PID file
         with open(pidfile, "w") as f:
             f.write(str(os.getpid()))
+        log.info(
+            "Starting WatcherBridge",
+            pid=os.getpid(),
+            pidfile=pidfile,
+            watch_path=watch_abspath,
+        )
         bridge.start()
         console.print(
             f"[bold green]Watcher started. PID: {os.getpid()} (PID file: {pidfile}). Press Ctrl+C to stop."
@@ -103,8 +136,10 @@ def start(
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
+        log.info("Watcher stopped by user")
         console.print("[yellow]Watcher stopped by user.")
     except Exception as e:
+        log.error("Error starting watcher", error=str(e))
         console.print(f"[red]Error starting watcher:[/] {e}")
     finally:
         # Remove PID file on exit
