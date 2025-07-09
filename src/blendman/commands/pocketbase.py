@@ -13,6 +13,25 @@ console = Console()
 
 
 @pocketbase_app.command()
+def login(email: str = typer.Option(None), password: str = typer.Option(None)):
+    """Login to PocketBase and store token for the session."""
+    from pocketbase.auth import AuthClient
+
+    client = AuthClient()
+    if not email:
+        email = input("Email: ")
+    if not password:
+        import getpass
+
+        password = getpass.getpass("Password: ")
+    try:
+        client.login(email, password)
+        console.print("[green]Login successful")
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        console.print(f"[red]Login failed: {exc}")
+
+
+@pocketbase_app.command()
 def ui(
     open_root: bool = typer.Option(
         False, help="Open static root instead of dashboard UI"

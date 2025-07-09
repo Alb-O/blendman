@@ -164,14 +164,6 @@ def start(
         start_pocketbase_if_needed(console)
         config = get_config()
         console.print(f"[green]Loaded config:[/] {config}")
-        if not os.environ.get("POCKETBASE_ADMIN_EMAIL") or not os.environ.get(
-            "POCKETBASE_ADMIN_PASSWORD"
-        ):
-            console.print(
-                "[red]PocketBase admin credentials missing. Set POCKETBASE_ADMIN_EMAIL and POCKETBASE_ADMIN_PASSWORD in the environment or a .env file."
-            )
-            console.print("Example: cp .env.example .env && edit the values.")
-            return
         db = DBInterface()
         watch_abspath = os.path.abspath(watch_path)
         matcher = config.get("matcher")

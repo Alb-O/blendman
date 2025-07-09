@@ -73,3 +73,21 @@ def test_logout_not_logged_in():
     with pytest.raises(PocketBaseError) as exc:
         client.logout()
     assert "Not logged in" in str(exc.value)
+
+
+def test_is_authenticated_valid_token():
+    client = AuthClient()
+    client.token_manager.set_token("tok")
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    with patch("pocketbase.auth.requests.post", return_value=mock_resp):
+        assert client.is_authenticated()
+
+
+def test_is_authenticated_invalid_token():
+    client = AuthClient()
+    client.token_manager.set_token("tok")
+    mock_resp = MagicMock()
+    mock_resp.status_code = 401
+    with patch("pocketbase.auth.requests.post", return_value=mock_resp):
+        assert not client.is_authenticated()

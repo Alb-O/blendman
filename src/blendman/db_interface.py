@@ -22,19 +22,25 @@ class DBInterface:
     def __init__(self):
         self.logger = structlog.get_logger("DBInterface")
         self.auth_client = AuthClient()
-        # Use admin credentials from env for initial login
+        self.api = PocketBaseAPI()
+        self._ensure_auth()
+
+    def _ensure_auth(self) -> None:
+        """Ensure the AuthClient is logged in, prompting if needed."""
+        if self.auth_client.is_authenticated():
+            return
         admin_email = os.environ.get("POCKETBASE_ADMIN_EMAIL")
         admin_password = os.environ.get("POCKETBASE_ADMIN_PASSWORD")
         if not admin_email or not admin_password:
-            raise ValueError(
-                "POCKETBASE_ADMIN_EMAIL and POCKETBASE_ADMIN_PASSWORD must be set in environment."
-            )
+            admin_email = input("PocketBase admin email: ")
+            import getpass
+
+            admin_password = getpass.getpass("PocketBase admin password: ")
         try:
             self.auth_client.login(admin_email, admin_password)
         except PocketBaseError as exc:
             self.logger.error("Auth login failed", error=str(exc))
             raise
-        self.api = PocketBaseAPI()
 
     def persist_event(self, event: dict) -> None:
         """
@@ -48,10 +54,8 @@ class DBInterface:
             "type": event["type"],
         }
         self.logger.info("[DBInterface] Creating file record", data=file_data)
-        if not self.auth_client.get_token():
-            admin_email = os.environ.get("POCKETBASE_ADMIN_EMAIL")
-            admin_password = os.environ.get("POCKETBASE_ADMIN_PASSWORD")
-            self.auth_client.login(admin_email, admin_password)
+        if not self.auth_client.is_authenticated():
+            self._ensure_auth()
         try:
             file_record = self.api.collections.create(  # pylint: disable=no-member
                 "files", file_data

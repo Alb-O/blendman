@@ -170,6 +170,22 @@ class AuthClient:
             self.logger.error("HTTP error during token refresh: %s", e)
             raise PocketBaseAuthError(f"HTTP error during token refresh: {e}") from e
 
+    def is_authenticated(self) -> bool:
+        """Check if the current auth token is valid via auth-refresh."""
+        token = self.token_manager.get_token()
+        if not token:
+            return False
+        url = f"{self.base_url}/api/collections/users/auth-refresh"
+        try:
+            resp = requests.post(
+                url,
+                headers={"Authorization": token},
+                timeout=5,
+            )
+            return resp.status_code == 200
+        except requests.RequestException:
+            return False
+
     def logout(self) -> None:
         """
         Logs out the current user by clearing the token and user info.
