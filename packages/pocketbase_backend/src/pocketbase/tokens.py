@@ -8,14 +8,13 @@ import threading
 
 
 class TokenManager:
-    """
-    Manages PocketBase auth tokens securely in memory.
-    Thread-safe for concurrent access.
-    """
+    """Global in-memory manager for PocketBase auth tokens."""
 
-    def __init__(self) -> None:
-        self._token: Optional[str] = None
-        self._lock = threading.Lock()
+    _token: Optional[str] = None
+    _lock = threading.Lock()
+
+    def __init__(self) -> None:  # pragma: no cover - nothing to initialize
+        pass
 
     def set_token(self, token: str) -> None:
         """
@@ -25,7 +24,7 @@ class TokenManager:
                 token (str): The auth token to store.
         """
         with self._lock:
-            self._token = token
+            TokenManager._token = token
 
     def get_token(self) -> Optional[str]:
         """
@@ -35,11 +34,11 @@ class TokenManager:
                 Optional[str]: The current auth token, or None if not set.
         """
         with self._lock:
-            return self._token
+            return TokenManager._token
 
     def clear_token(self) -> None:
         """
         Clear the current auth token from memory.
         """
         with self._lock:
-            self._token = None
+            TokenManager._token = None
