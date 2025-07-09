@@ -2,15 +2,17 @@
 Public API for rename_watcher.
 """
 
-from typing import Callable, Any, List, Optional, Dict
+from typing import Any, Callable, Dict, List, Optional
 import os
+
 import structlog  # type: ignore
+
 from .watcher import Watcher
 from .path_map import PathInodeMap
 from .event_processor import EventProcessor
 
 
-class RenameWatcherAPI:
+class RenameWatcherAPI:  # pylint: disable=too-many-instance-attributes
     """
     Public API for subscribing to high-level file system events.
     Wires up Watcher, PathInodeMap, and EventProcessor.
@@ -21,8 +23,6 @@ class RenameWatcherAPI:
         path: Optional[str] = None,
         matcher: Optional[Callable[[str], bool]] = None,
     ) -> None:
-        import structlog  # type: ignore
-
         self.logger = structlog.get_logger("RenameWatcherAPI")
         self._subscribers: List[Callable[[Any], None]] = []
         self._matcher = matcher
@@ -95,8 +95,9 @@ class RenameWatcherAPI:
                     "Calling subscriber", subscriber=repr(cb), event_payload=payload
                 )
                 cb(payload)
-            except Exception as e:
-                # Broad exception is justified here to prevent a single subscriber from breaking the event chain.
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                # Broad exception is okay here.
+                # One bad subscriber shouldn't stop others.
                 self.logger.error(
                     "Subscriber callback failed",
                     subscriber=repr(cb),
@@ -123,7 +124,7 @@ class RenameWatcherAPI:
             try:
                 inode = os.stat(event["src_path"]).st_ino
                 self._path_map.add(event["src_path"], inode)
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 # Broad exception is justified here to avoid breaking event flow on stat failure.
                 log.warning(
                     "_on_raw_event failed to stat created file",

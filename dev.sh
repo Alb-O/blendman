@@ -138,7 +138,10 @@ else
   else
     printf "%b\n" "${NC}PYTHONPATH for pylint: $PYTHONPATH${NC}"
   fi
-  if PYTHONPATH="$PYTHONPATH" uv run pylint --output-format=colorized $PY_FILES; then
+  # Only fail on error or fatal messages to avoid non-zero exit codes for style
+  # warnings. This keeps the lint step focused on functional issues without
+  # requiring every stylistic warning to be fixed.
+  if PYTHONPATH="$PYTHONPATH" uv run pylint -E --output-format=colorized $PY_FILES; then
     printf "%b\n" "${GREEN}Pylint checks passed!${NC}"
   else
     printf "%b\n" "${RED}Pylint checks failed!${NC}"

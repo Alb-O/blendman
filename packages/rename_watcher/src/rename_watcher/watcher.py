@@ -3,6 +3,9 @@ Core watcher logic for rename_watcher.
 Wraps watchdog to monitor file and directory events recursively.
 """
 
+# This module favors clarity over strict pylint limits
+# pylint: disable=too-many-instance-attributes,too-many-arguments,too-many-positional-arguments
+
 import os
 import threading
 import time
@@ -114,8 +117,8 @@ class Watcher:
             def on_created(self, event: Any) -> None:
                 """Handle file/directory creation event."""
                 print(f"[Watcher] Raw event: created {event.src_path}")
-                # Access to protected member is justified: this is an internal callback.
-                parent._handle_raw_event(
+                # Accessing protected member is fine in this internal callback.
+                parent._handle_raw_event(  # pylint: disable=protected-access
                     {
                         "type": "created",
                         "src_path": getattr(event, "src_path", None),
@@ -126,7 +129,7 @@ class Watcher:
             def on_deleted(self, event: Any) -> None:
                 """Handle file/directory deletion event."""
                 print(f"[Watcher] Raw event: deleted {event.src_path}")
-                parent._handle_raw_event(
+                parent._handle_raw_event(  # pylint: disable=protected-access
                     {
                         "type": "deleted",
                         "src_path": getattr(event, "src_path", None),
@@ -140,7 +143,7 @@ class Watcher:
                     f"[Watcher] Raw event: moved {event.src_path} -> "
                     f"{getattr(event, 'dest_path', None)}"
                 )
-                parent._handle_raw_event(
+                parent._handle_raw_event(  # pylint: disable=protected-access
                     {
                         "type": "moved",
                         "src_path": getattr(event, "src_path", None),
@@ -149,10 +152,10 @@ class Watcher:
                     }
                 )
 
-            def on_modified(self, event: Any) -> None:
+            def on_modified(self, _event: Any) -> None:
                 """Handle file/directory modification event (optional)."""
                 # No-op: modification events are not handled.
-                ...
+                return None
 
         return Handler()
 
@@ -175,12 +178,13 @@ class Watcher:
                 inode = os.stat(event["src_path"]).st_ino
                 self._path_map.add(event["src_path"], inode)
                 print(f"[Watcher] Added inode mapping: {event['src_path']} -> {inode}")
-            except Exception as exc:
-                # Broad exception is justified: stat may fail for race conditions, do not break event flow.
+            except Exception as exc:  # pylint: disable=broad-exception-caught
+                # Broad exception is justified: stat may fail for race conditions
+                # so we do not break the event flow.
                 print(f"[Watcher] Failed to stat created file: {exc}")
         self._event_processor.process(event)
 
-    def _emit_high_level(self, event_type: str, payload: dict[str, Any]) -> None:
+    def _emit_high_level(self, _event_type: str, _payload: dict[str, Any]) -> None:
         """
         Callback for emitting high-level events (legacy/test only).
 
@@ -189,6 +193,8 @@ class Watcher:
             payload (dict[str, Any]): The event payload.
         """
         # This method is only used as a callback for EventProcessor in legacy/test cases.
-        # In production, high-level event emission should be handled by RenameWatcherAPI._emit_high_level only.
-        # Do not emit or print here. All high-level event routing must go through the API for correct subscriber delivery.
-        pass
+        # In production, high-level event emission should be handled by
+        # RenameWatcherAPI._emit_high_level only. Do not emit or print here.
+        # All high-level event routing must go through the API for correct
+        # subscriber delivery.
+        return None

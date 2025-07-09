@@ -12,20 +12,20 @@ console = Console()
 
 @backend_app.command()
 def query(
-    type: str = typer.Argument(..., help="Type of query: files or logs"),
+    query_type: str = typer.Argument(..., help="Type of query: files or logs"),
     file_id: str = typer.Option(None, help="File ID for logs or state queries"),
 ):
     """
     Query backend for files or logs.
     """
     db = DBInterface()
-    if type == "files":
+    if query_type == "files":
         if file_id:
             result = db.get_file_state(file_id)
             console.print(result)
         else:
             console.print("[yellow]Listing all files is not implemented.")
-    elif type == "logs":
+    elif query_type == "logs":
         if file_id:
             logs = db.get_logs_for_file(file_id)
             console.print(logs)

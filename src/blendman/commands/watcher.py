@@ -2,34 +2,28 @@
 Watcher-related CLI commands for blendman.
 """
 
-import sys
+# pylint: disable=consider-using-with
+
 import os
+import logging
+import platform
+import signal
+import socket
+import subprocess
+import sys
+import time
+
+import structlog  # type: ignore
 import typer  # type: ignore
 from rich.console import Console  # type: ignore
-import structlog  # type: ignore
-
-import subprocess
-import platform
-import socket
-
-# Ensure monorepo packages are importable
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
-sys.path.insert(
-    0,
-    os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../../../packages/rename_watcher/src")
-    ),
-)
 
 from rename_watcher.config import get_config
 from blendman.watcher_bridge import WatcherBridge
 from blendman.db_interface import DBInterface
-import time
 
 
 def setup_logging():
-    import logging
-
+    """Configure structlog and stdlib logging for the CLI."""
     structlog.configure(
         processors=[
             structlog.processors.TimeStamper(fmt="iso"),
@@ -55,6 +49,7 @@ console = Console()
 
 
 def is_pocketbase_running(host: str = "127.0.0.1", port: int = 8090) -> bool:
+    """Check if the PocketBase server is reachable."""
     try:
         with socket.create_connection((host, port), timeout=1):
             return True
@@ -62,11 +57,14 @@ def is_pocketbase_running(host: str = "127.0.0.1", port: int = 8090) -> bool:
         return False
 
 
-def start_pocketbase_if_needed(console):
+def start_pocketbase_if_needed(app_console: Console) -> None:
+    """Start the PocketBase server if it is not already running."""
     if is_pocketbase_running():
-        console.print("[green]PocketBase server is already running.")
+        app_console.print("[green]PocketBase server is already running.")
         return
-    console.print("[yellow]PocketBase server not detected. Attempting to start it...")
+    app_console.print(
+        "[yellow]PocketBase server not detected. Attempting to start it..."
+    )
     backend_dir = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "../../../packages/pocketbase_backend")
     )
@@ -75,16 +73,18 @@ def start_pocketbase_if_needed(console):
         bin_path = os.path.join(backend_dir, "pocketbase_bin.exe")
         cmd = [bin_path, "serve"]
         subprocess.Popen(
-            cmd, cwd=backend_dir, creationflags=subprocess.CREATE_NEW_CONSOLE
-        )
+            cmd,
+            cwd=backend_dir,
+            creationflags=subprocess.CREATE_NEW_CONSOLE,
+        )  # pylint: disable=consider-using-with
     else:
         bin_path = os.path.join(backend_dir, "pocketbase_bin")
         cmd = [bin_path, "serve"]
-        subprocess.Popen(cmd, cwd=backend_dir)
+        subprocess.Popen(cmd, cwd=backend_dir)  # pylint: disable=consider-using-with
     # Wait for server to be available
     for _ in range(20):
         if is_pocketbase_running():
-            console.print("[green]PocketBase server started.")
+            app_console.print("[green]PocketBase server started.")
             return
         time.sleep(0.5)
     raise RuntimeError("PocketBase server did not start within 10 seconds.")
@@ -97,7 +97,10 @@ def start(
     ),
     watch_path: str = typer.Option(
         ".",
-        help="Directory to watch for file changes (recursively watches all subdirectories, defaults to current directory).",
+        help=(
+            "Directory to watch for file changes (recursively watches all "
+            "subdirectories, defaults to current directory)."
+        ),
     ),
     pidfile: str = typer.Option(
         "./.blendman_watcher.pid", help="Path to PID file for watcher process."
@@ -121,7 +124,7 @@ def start(
         matcher = config.get("matcher")
         bridge = WatcherBridge(db, path=watch_abspath, matcher=matcher)
         # Write PID file
-        with open(pidfile, "w") as f:
+        with open(pidfile, "w", encoding="utf-8") as f:
             f.write(str(os.getpid()))
         log.info(
             "Starting WatcherBridge",
@@ -131,16 +134,19 @@ def start(
         )
         bridge.start()
         console.print(
-            f"[bold green]Watcher started. PID: {os.getpid()} (PID file: {pidfile}). Press Ctrl+C to stop."
+            (
+                f"[bold green]Watcher started. PID: {os.getpid()} "
+                f"(PID file: {pidfile}). Press Ctrl+C to stop."
+            )
         )
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
         log.info("Watcher stopped by user")
         console.print("[yellow]Watcher stopped by user.")
-    except Exception as e:
-        log.error("Error starting watcher", error=str(e))
-        console.print(f"[red]Error starting watcher:[/] {e}")
+    except Exception as exc:  # pylint: disable=broad-exception-caught
+        log.error("Error starting watcher", error=str(exc))
+        console.print(f"[red]Error starting watcher:[/] {exc}")
     finally:
         # Remove PID file on exit
         if os.path.exists(pidfile):
@@ -162,13 +168,13 @@ def stop(
         )
         return
     try:
-        with open(pidfile, "r") as f:
+        with open(pidfile, "r", encoding="utf-8") as f:
             pid = int(f.read().strip())
         if platform.system().lower() == "windows":
-            import ctypes
+            import ctypes  # pylint: disable=import-outside-toplevel
 
-            PROCESS_TERMINATE = 1
-            handle = ctypes.windll.kernel32.OpenProcess(PROCESS_TERMINATE, False, pid)
+            process_terminate = 1
+            handle = ctypes.windll.kernel32.OpenProcess(process_terminate, False, pid)
             if not handle:
                 raise OSError(f"Could not open process {pid}")
             result = ctypes.windll.kernel32.TerminateProcess(handle, -1)
@@ -176,13 +182,11 @@ def stop(
             if not result:
                 raise OSError(f"Failed to terminate process {pid}")
         else:
-            import signal
-
             os.kill(pid, signal.SIGTERM)
         console.print(f"[green]Stopped watcher process with PID {pid}.")
         os.remove(pidfile)
-    except Exception as e:
-        console.print(f"[red]Failed to stop watcher: {e}")
+    except OSError as exc:
+        console.print(f"[red]Failed to stop watcher: {exc}")
 
 
 @watcher_app.command()
@@ -198,15 +202,15 @@ def status(
         console.print(f"[yellow]Watcher is not running (no PID file at {pidfile}).")
         return
     try:
-        with open(pidfile, "r") as f:
+        with open(pidfile, "r", encoding="utf-8") as f:
             pid = int(f.read().strip())
         # Check if process is alive
         if platform.system().lower() == "windows":
-            import ctypes
+            import ctypes  # pylint: disable=import-outside-toplevel
 
-            PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+            process_query_limited_information = 0x1000
             handle = ctypes.windll.kernel32.OpenProcess(
-                PROCESS_QUERY_LIMITED_INFORMATION, False, pid
+                process_query_limited_information, False, pid
             )
             if handle:
                 ctypes.windll.kernel32.CloseHandle(handle)
@@ -225,5 +229,5 @@ def status(
             console.print(
                 f"[yellow]Watcher PID file exists but process {pid} is not running."
             )
-    except Exception as e:
-        console.print(f"[red]Error checking watcher status: {e}")
+    except (OSError, ValueError) as exc:
+        console.print(f"[red]Error checking watcher status: {exc}")

@@ -1,6 +1,7 @@
-"""
-Fuzz tests for rename_watcher: randomized, high-frequency file/dir operations, edge-case names, deep nesting, concurrency.
-"""
+"""Fuzz tests exercising rename_watcher under heavy, random workloads."""
+
+# Broad exceptions are acceptable here to keep fuzzing robust
+# pylint: disable=broad-exception-caught
 
 import os
 import random

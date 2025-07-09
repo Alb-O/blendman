@@ -3,9 +3,10 @@ Event correlation and rename/move detection for rename_watcher.
 """
 
 from typing import Any, Dict, Optional, Callable, List
-import time
-import structlog  # type: ignore
 import os
+import time
+
+import structlog  # type: ignore
 
 from .path_map import PathInodeMap
 

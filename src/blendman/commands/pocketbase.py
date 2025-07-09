@@ -3,9 +3,10 @@ PocketBase-related CLI commands for blendman.
 """
 
 import os
+import webbrowser
+
 import typer  # type: ignore
 from rich.console import Console  # type: ignore
-import webbrowser
 
 pocketbase_app = typer.Typer()
 console = Console()
@@ -39,7 +40,10 @@ def superuser(email: str = typer.Argument(...), password: str = typer.Argument(.
     Create the first superuser via CLI.
     """
     console.print(
-        f"[green]Creating superuser {email} (not implemented, run './pocketbase superuser create {email} {password}')"
+        (
+            f"[green]Creating superuser {email} "
+            f"(not implemented, run './pocketbase superuser create {email} {password}')"
+        )
     )
 
 
