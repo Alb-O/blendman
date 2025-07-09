@@ -3,7 +3,7 @@ MFA and OAuth2 logic for PocketBase authentication.
 Implements stubs if not enabled in PocketBase admin UI.
 """
 
-from typing import Optional, Dict
+from typing import Optional, Dict, Any
 
 
 class MFAClient:
@@ -15,7 +15,7 @@ class MFAClient:
     def __init__(self) -> None:
         pass
 
-    def login_with_otp(self, identity: str, otp: str) -> Optional[Dict]:
+    def login_with_otp(self, _identity: str, _otp: str) -> Optional[Dict[str, Any]]:
         """
         Stub for OTP login. Implement if enabled in PocketBase.
 
@@ -30,8 +30,8 @@ class MFAClient:
         return None
 
     def login_with_oauth2(
-        self, provider: str, code: str, redirect_uri: str
-    ) -> Optional[Dict]:
+        self, _provider: str, _code: str, _redirect_uri: str
+    ) -> Optional[Dict[str, Any]]:
         """
         Stub for OAuth2 login. Implement if enabled in PocketBase.
 

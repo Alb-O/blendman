@@ -2,8 +2,10 @@
 Event correlation and rename/move detection for rename_watcher.
 """
 
-from typing import Any, Dict, Optional, Callable
+from typing import Any, Dict, Optional, Callable, List
 import time
+import structlog  # type: ignore
+import os
 
 from .path_map import PathInodeMap
 
@@ -52,9 +54,6 @@ class EventProcessor:
             event (Dict[str, Any]): Raw event from watcher. Must include 'type', 'src_path',
                 and optionally 'dest_path'.
         """
-        import structlog  # type: ignore
-        import os
-
         log = structlog.get_logger("EventProcessor")
         log.info("process called", pid=os.getpid(), event_data=event)
         event_type = event.get("type")
@@ -83,9 +82,13 @@ class EventProcessor:
         self._flush_pending_events(now)
 
     def _handle_native_move(self, src_path: str, dest_path: str) -> None:
-        import structlog  # type: ignore
-        import os
+        """
+        Handle a native move/rename event and emit high-level events for folder and descendants.
 
+        Args:
+            src_path (str): Source path.
+            dest_path (str): Destination path.
+        """
         log = structlog.get_logger("EventProcessor")
         log.info(
             "_handle_native_move called",
@@ -97,7 +100,7 @@ class EventProcessor:
         descendants = self.path_map.descendants(dest_path)
         for path, inode in descendants.items():
             if self.emit_event:
-                payload = {
+                payload: Dict[str, Any] = {
                     "path": path,
                     "inode": inode,
                     "old_parent": src_path,
@@ -107,16 +110,26 @@ class EventProcessor:
                 self.emit_event("moved", payload)
         if self.emit_event:
             folder_inode = self.path_map.get_inode(dest_path)
-            payload = {
+            folder_payload: Dict[str, Any] = {
                 "path": dest_path,
                 "inode": folder_inode,
                 "old_parent": src_path,
                 "new_parent": dest_path,
             }
-            log.info("_handle_native_move emitting folder", payload=payload)
-            self.emit_event("moved", payload)
+            log.info("_handle_native_move emitting folder", payload=folder_payload)
+            self.emit_event("moved", folder_payload)
 
     def _handle_deleted_event(self, src_path: str, now: float) -> bool:
+        """
+        Handle a deleted event, check for possible paired create (move/rename), and emit events.
+
+        Args:
+            src_path (str): Source path.
+            now (float): Current time.
+
+        Returns:
+            bool: True if handled as a move, False otherwise.
+        """
         self._pending_deletes[src_path] = now
         self._pending_payloads[src_path] = {
             "path": src_path,
@@ -142,6 +155,16 @@ class EventProcessor:
         return False
 
     def _handle_created_event(self, src_path: str, now: float) -> bool:
+        """
+        Handle a created event, check for possible paired delete (move/rename), and emit events.
+
+        Args:
+            src_path (str): Source path.
+            now (float): Current time.
+
+        Returns:
+            bool: True if handled as a move, False otherwise.
+        """
         self._pending_creates[src_path] = now
         self._pending_payloads[src_path] = {
             "path": src_path,
@@ -167,7 +190,13 @@ class EventProcessor:
         return False
 
     def _flush_pending_events(self, now: float) -> None:
-        to_delete: list[str] = []
+        """
+        Flush all pending create and delete events that have exceeded the debounce window.
+
+        Args:
+            now (float): Current time.
+        """
+        to_delete: List[str] = []
         for path, t in self._pending_deletes.items():
             if now - t > self.DEBOUNCE_WINDOW:
                 if self.emit_event:
@@ -179,7 +208,7 @@ class EventProcessor:
             del self._pending_deletes[path]
             self._pending_payloads.pop(path, None)
 
-        to_create: list[str] = []
+        to_create: List[str] = []
         for path, t in self._pending_creates.items():
             if now - t > self.DEBOUNCE_WINDOW:
                 if self.emit_event:

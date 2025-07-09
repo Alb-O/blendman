@@ -2,8 +2,8 @@
 Tests for new AuthClient features: OTP, OAuth2, MFA, impersonation, and token refresh.
 """
 
-import pytest  # type: ignore
 from unittest.mock import patch, MagicMock
+import pytest  # type: ignore
 from pocketbase.auth import AuthClient
 from pocketbase.exceptions import PocketBaseAuthError
 

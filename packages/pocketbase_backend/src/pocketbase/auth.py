@@ -3,10 +3,10 @@ Authentication logic for PocketBase API.
 Handles login, logout, token management, OTP, OAuth2, MFA, and impersonation.
 """
 
-from typing import Optional, Any
-import os
-import requests  # type: ignore
 import logging
+import os
+from typing import Optional, Any
+import requests  # type: ignore
 from .exceptions import PocketBaseAuthError
 from .utils import load_env
 from .tokens import TokenManager
@@ -51,7 +51,7 @@ class AuthClient:
             resp = requests.post(url, json=data, timeout=10)
             if resp.status_code != 200:
                 raise PocketBaseAuthError(
-                    f"Login failed: {resp.status_code} {resp.text}"
+                    "Login failed: %s %s" % (resp.status_code, resp.text)
                 )
             result = resp.json()
             token = result.get("token")
@@ -61,7 +61,7 @@ class AuthClient:
             self.token_manager.set_token(token)
             return token
         except requests.RequestException as e:
-            self.logger.error(f"HTTP error during login: {e}")
+            self.logger.error("HTTP error during login: %s", e)
             raise PocketBaseAuthError(f"HTTP error during login: {e}") from e
 
     def login_with_otp(self, identity: str, otp: str) -> Optional[str]:
@@ -76,7 +76,7 @@ class AuthClient:
             Optional[str]: Auth token or None if not implemented.
         """
         result = self.mfa_client.login_with_otp(identity, otp)
-        if result and "token" in result:
+        if isinstance(result, dict) and "token" in result:
             self.token_manager.set_token(result["token"])
             self.user = result.get("record")
             return result["token"]
@@ -97,7 +97,7 @@ class AuthClient:
             Optional[str]: Auth token or None if not implemented.
         """
         result = self.mfa_client.login_with_oauth2(provider, code, redirect_uri)
-        if result and "token" in result:
+        if isinstance(result, dict) and "token" in result:
             self.token_manager.set_token(result["token"])
             self.user = result.get("record")
             return result["token"]
@@ -126,7 +126,7 @@ class AuthClient:
             resp = requests.post(url, headers=headers, timeout=10)
             if resp.status_code != 200:
                 raise PocketBaseAuthError(
-                    f"Impersonation failed: {resp.status_code} {resp.text}"
+                    "Impersonation failed: %s %s" % (resp.status_code, resp.text)
                 )
             result = resp.json()
             imp_token = result.get("token")
@@ -136,7 +136,7 @@ class AuthClient:
             self.user = result.get("record")
             return imp_token
         except requests.RequestException as e:
-            self.logger.error(f"HTTP error during impersonation: {e}")
+            self.logger.error("HTTP error during impersonation: %s", e)
             raise PocketBaseAuthError(f"HTTP error during impersonation: {e}") from e
 
     def refresh_token(self) -> str:
@@ -158,7 +158,7 @@ class AuthClient:
             resp = requests.post(url, headers=headers, timeout=10)
             if resp.status_code != 200:
                 raise PocketBaseAuthError(
-                    f"Token refresh failed: {resp.status_code} {resp.text}"
+                    "Token refresh failed: %s %s" % (resp.status_code, resp.text)
                 )
             result = resp.json()
             new_token = result.get("token")
@@ -167,7 +167,7 @@ class AuthClient:
             self.token_manager.set_token(new_token)
             return new_token
         except requests.RequestException as e:
-            self.logger.error(f"HTTP error during token refresh: {e}")
+            self.logger.error("HTTP error during token refresh: %s", e)
             raise PocketBaseAuthError(f"HTTP error during token refresh: {e}") from e
 
     def logout(self) -> None:

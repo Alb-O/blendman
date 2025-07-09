@@ -2,8 +2,9 @@
 Public API for rename_watcher.
 """
 
-from typing import Callable, Any, List, Optional
+from typing import Callable, Any, List, Optional, Dict
 import os
+import structlog  # type: ignore
 from .watcher import Watcher
 from .path_map import PathInodeMap
 from .event_processor import EventProcessor
@@ -39,11 +40,17 @@ class RenameWatcherAPI:
         self._watcher_started = False
 
     def start(self):
+        """
+        Start the watcher if it is not already started.
+        """
         if not self._watcher_started:
             self._watcher.start()
             self._watcher_started = True
 
     def stop(self):
+        """
+        Stop the watcher if it is running.
+        """
         if self._watcher_started:
             self._watcher.stop()
             self._watcher_started = False
@@ -65,9 +72,14 @@ class RenameWatcherAPI:
         """
         self._emit_high_level(event.get("type", "unknown"), event)
 
-    def _emit_high_level(self, event_type: str, payload: dict):
-        import os
+    def _emit_high_level(self, event_type: str, payload: Dict[str, Any]):
+        """
+        Emit a high-level event to all subscribers.
 
+        Args:
+            event_type (str): The type of event.
+            payload (Dict[str, Any]): The event payload.
+        """
         # Do not mutate the event dict; pass as-is to subscribers
         self.logger.info(
             "_emit_high_level called",
@@ -84,6 +96,7 @@ class RenameWatcherAPI:
                 )
                 cb(payload)
             except Exception as e:
+                # Broad exception is justified here to prevent a single subscriber from breaking the event chain.
                 self.logger.error(
                     "Subscriber callback failed",
                     subscriber=repr(cb),
@@ -91,10 +104,13 @@ class RenameWatcherAPI:
                     event_payload=payload,
                 )
 
-    def _on_raw_event(self, event: dict):
-        import structlog  # type: ignore
-        import os
+    def _on_raw_event(self, event: Dict[str, Any]):
+        """
+        Handle a raw event from the watcher, filter, and process it.
 
+        Args:
+            event (Dict[str, Any]): The raw event data.
+        """
         log = structlog.get_logger("RenameWatcherAPI")
         log.info("_on_raw_event called", pid=os.getpid(), event_data=event)
         # Optionally filter with matcher
@@ -108,6 +124,7 @@ class RenameWatcherAPI:
                 inode = os.stat(event["src_path"]).st_ino
                 self._path_map.add(event["src_path"], inode)
             except Exception:
+                # Broad exception is justified here to avoid breaking event flow on stat failure.
                 log.warning(
                     "_on_raw_event failed to stat created file",
                     src_path=event["src_path"],

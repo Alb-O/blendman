@@ -2,11 +2,11 @@
 Fuzz tests for rename_watcher: randomized, high-frequency file/dir operations, edge-case names, deep nesting, concurrency.
 """
 
-from hypothesis import event
-import random
 import os
-import pytest
+import random
 from typing import Any
+import pytest
+from hypothesis import event
 from pyfakefs.fake_filesystem_unittest import Patcher
 from . import utils
 
@@ -37,6 +37,7 @@ def random_file_ops(fs: Any, root: str, n_ops: int = 50, edge_case_names: bool =
                 fs.remove_object(p)  # type: ignore[attr-defined]
                 all_paths.remove(p)
             except Exception:
+                # Broad exception is justified: any error is valid for fuzzing edge case.
                 pass
         elif op == "rename" and all_paths:
             p = random.choice(list(all_paths))
@@ -46,6 +47,7 @@ def random_file_ops(fs: Any, root: str, n_ops: int = 50, edge_case_names: bool =
                 all_paths.remove(p)
                 all_paths.add(new_p)
             except Exception:
+                # Broad exception is justified: any error is valid for fuzzing edge case.
                 pass
         elif op == "move" and all_paths:
             p = random.choice(list(all_paths))
@@ -59,13 +61,15 @@ def random_file_ops(fs: Any, root: str, n_ops: int = 50, edge_case_names: bool =
                 all_paths.remove(p)
                 all_paths.add(new_p)
             except Exception:
+                # Broad exception is justified: any error is valid for fuzzing edge case.
                 pass
         elif op == "modify" and all_paths:
             p = random.choice(list(all_paths))
             try:
-                with open(p, "a") as f:
+                with open(p, "a", encoding="utf-8") as f:
                     f.write("fuzzmod\n")
             except Exception:
+                # Broad exception is justified: any error is valid for fuzzing edge case.
                 pass
 
 

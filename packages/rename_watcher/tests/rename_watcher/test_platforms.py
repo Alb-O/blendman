@@ -27,7 +27,7 @@ def test_inotify_event_coalescing_and_overflow():
         fs.makedirs(root, exist_ok=True)  # type: ignore[attr-defined,union-attr]
         for i in range(1000):
             fname = f"file_{i}.txt"
-            fs.create_file(os.path.join(root, fname), contents="x")  # type: ignore[attr-defined,union-attr]
+            fs.create_file(os.path.join(root, fname), contents="x")
         # No assertion: just ensure no crash/hang
 
 

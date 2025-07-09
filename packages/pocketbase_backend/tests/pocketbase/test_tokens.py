@@ -2,10 +2,14 @@
 Unit tests for TokenManager (token management utilities).
 """
 
+import threading
 from pocketbase.tokens import TokenManager
 
 
 def test_token_manager_set_and_get():
+    """
+    Test that set_token, get_token, and clear_token work as expected.
+    """
     tm = TokenManager()
     tm.set_token("abc")
     assert tm.get_token() == "abc"
@@ -14,8 +18,9 @@ def test_token_manager_set_and_get():
 
 
 def test_token_manager_thread_safety():
-    import threading
-
+    """
+    Test that TokenManager is thread-safe when setting tokens from multiple threads.
+    """
     tm = TokenManager()
 
     def set_token():

@@ -107,9 +107,14 @@ class Watcher:
         parent = self
 
         class Handler(FileSystemEventHandler):  # type: ignore[misc]
+            """
+            Internal event handler for file system events.
+            """
+
             def on_created(self, event: Any) -> None:
                 """Handle file/directory creation event."""
                 print(f"[Watcher] Raw event: created {event.src_path}")
+                # Access to protected member is justified: this is an internal callback.
                 parent._handle_raw_event(
                     {
                         "type": "created",
@@ -132,7 +137,8 @@ class Watcher:
             def on_moved(self, event: Any) -> None:
                 """Handle file/directory move event."""
                 print(
-                    f"[Watcher] Raw event: moved {event.src_path} -> {getattr(event, 'dest_path', None)}"
+                    f"[Watcher] Raw event: moved {event.src_path} -> "
+                    f"{getattr(event, 'dest_path', None)}"
                 )
                 parent._handle_raw_event(
                     {
@@ -145,7 +151,8 @@ class Watcher:
 
             def on_modified(self, event: Any) -> None:
                 """Handle file/directory modification event (optional)."""
-                pass
+                # No-op: modification events are not handled.
+                ...
 
         return Handler()
 
@@ -169,6 +176,7 @@ class Watcher:
                 self._path_map.add(event["src_path"], inode)
                 print(f"[Watcher] Added inode mapping: {event['src_path']} -> {inode}")
             except Exception as exc:
+                # Broad exception is justified: stat may fail for race conditions, do not break event flow.
                 print(f"[Watcher] Failed to stat created file: {exc}")
         self._event_processor.process(event)
 
