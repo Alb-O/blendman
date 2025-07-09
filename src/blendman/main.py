@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+import os
 import shlex
+import socket
 import sys
 
 from rich.console import Console
 from rich.panel import Panel
 from pyfiglet import Figlet
+from prompt_toolkit import PromptSession
+from prompt_toolkit.formatted_text import HTML
+from prompt_toolkit.styles import Style
 
 from .cli import app
 
@@ -32,19 +37,52 @@ def interactive_shell() -> None:
     """Run an interactive shell for executing CLI commands."""
     import click
 
+    def is_pocketbase_running(host: str = "127.0.0.1", port: int = 8090) -> bool:
+        try:
+            with socket.create_connection((host, port), timeout=1):
+                return True
+        except OSError:
+            return False
+
+    def watcher_status(pidfile: str = "./.blendman_watcher.pid") -> str:
+        if not os.path.exists(pidfile):
+            return "off"
+        try:
+            with open(pidfile, "r", encoding="utf-8") as f:
+                pid = int(f.read().strip())
+            os.kill(pid, 0)
+            return "on"
+        except Exception:  # pylint: disable=broad-exception-caught
+            return "dead"
+
+    def status_bar() -> str:
+        pb = "[green]PB: running[/]" if is_pocketbase_running() else "[red]PB: stopped[/]"
+        watch = watcher_status()
+        watch_dirs = os.getenv("BLENDMAN_WATCH_PATH", os.getcwd())
+        return f"{pb} | [cyan]watcher: {watch}[/] | [magenta]{watch_dirs}[/]"
+
+    style = Style.from_dict({
+        "prompt": "bold cyan",
+        "bottom-toolbar": "bg:#444444 #ffffff",
+    })
+
     _print_logo()
-    # Aliases for common typos/shortcuts
+    session = PromptSession(
+        HTML("<prompt>blendman&gt;</prompt> "),
+        bottom_toolbar=lambda: HTML(status_bar()),
+        style=style,
+    )
+
     aliases = {
         "watch": "watcher",
         "conf": "config",
         "pb": "pocketbase",
         "back": "backend",
     }
-    # Get available command groups for help fallback
     command_groups = {"watcher", "config", "backend", "pocketbase"}
     while True:  # pragma: no cover - requires user interaction
         try:
-            line = input("blendman> ")
+            line = session.prompt()
         except (EOFError, KeyboardInterrupt):
             console.print()
             break
@@ -66,11 +104,9 @@ def interactive_shell() -> None:
             continue
         try:
             app(args, standalone_mode=False)
-        except click.UsageError as exc:
+        except click.UsageError:
             # Friendly error for unknown commands
-            console.print(
-                f"[yellow]Unknown command:[/] '{' '.join(args)}'\nType 'help' or 'exit'."
-            )
+            console.print(f"[yellow]Unknown command:[/] '{' '.join(args)}'\nType 'help' or exit.")
         except SystemExit as exc:  # pragma: no cover - handled gracefully
             if exc.code != 0:
                 console.print(f"[red]Command failed with code {exc.code}")
