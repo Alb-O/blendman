@@ -62,9 +62,13 @@ def start(
     config_path: str = typer.Option(
         "blendman_config.toml", help="Path to blendman config TOML file."
     ),
+    watch_path: str = typer.Option(
+        ".", help="Directory to watch for file changes (recursively watches all subdirectories, defaults to current directory)."
+    ),
 ):
     """
     Start the watcher with the given config and bridge events to the backend DB.
+    Recursively watches all subdirectories of the specified directory.
     """
     console.print(f"[bold green]Starting watcher with config:[/] {config_path}")
     os.environ["BLENDMAN_CONFIG_TOML"] = config_path
@@ -73,7 +77,10 @@ def start(
         config = get_config()
         console.print(f"[green]Loaded config:[/] {config}")
         db = DBInterface()
-        bridge = WatcherBridge(db)
+        # Use watch_path as the directory to watch
+        watch_abspath = os.path.abspath(watch_path)
+        matcher = config.get("matcher")
+        bridge = WatcherBridge(db, path=watch_abspath, matcher=matcher)
         bridge.start()
         console.print("[bold green]Watcher started. Press Ctrl+C to stop.")
         while True:
