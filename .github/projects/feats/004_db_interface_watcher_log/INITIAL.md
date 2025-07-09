@@ -15,7 +15,7 @@ Remember, initially, you will not implement any real code, you have been assigne
 ## VALIDATION & SELF-CHECKS (Validation Gates):
 
 - Every new function, class, or route MUST have Pytest unit tests (expected use, edge, and failure cases).
-- Run all tests (`dev.sh` or `dev.ps`) after every change. Never consider a task complete until all validation gates pass.
+- Run all tests (`dev.py`) after every change. Never consider a task complete until all validation gates pass.
 - If a validation gate fails, debug, fix, and re-run until it passes. Document root causes and solutions.
 
 ## OTHER CONSIDERATIONS (Agent Behavior Rules):

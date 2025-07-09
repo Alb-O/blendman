@@ -11,7 +11,7 @@
 - [x] Added `.env.example` for new environment variables and ensured `load_env()` is used.
 - [x] Wrote Pytest unit tests for all new logic (expected, edge, failure cases).
 - [x] Updated the main `README.md` with setup/integration notes.
-- [x] Ran `./dev.ps1` to validate with `ruff`, `mypy`, and `pytest`. All blendman validation gates passed.
+- [x] Ran `./dev.py` to validate with `ruff`, `mypy`, and `pytest`. All blendman validation gates passed.
 
 ## Next Steps
 - [ ] Final review: re-read PRD, ensure all requirements and validation gates are met.

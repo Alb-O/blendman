@@ -32,7 +32,7 @@ This PRD defines a robust, secure, and maintainable authentication system for bl
 
 ### Success Criteria (Validation Gates)
 - [ ] All new functions/classes/routes have Pytest unit tests (expected, edge, failure cases).
-- [ ] Run `./dev.sh` or `./dev.ps1` after every major change; all validation gates must pass.
+- [ ] Run `./dev.py` after every major change; all validation gates must pass.
 - [ ] If a validation gate fails, debug, fix, and re-run until it passes. Document root causes and solutions.
 - [ ] No hardcoded secrets; all config via environment variables.
 - [ ] All error cases are handled and logged.
@@ -117,7 +117,7 @@ README.md                            # Setup and security notes
 
 ### Level 1: Syntax & Style
 ```bash
-./dev.sh
+./dev.py
 # Expected: No errors or warnings. If errors/warnings, analyze, fix, and re-run until passing.
 ```
 

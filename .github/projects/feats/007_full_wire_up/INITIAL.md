@@ -12,7 +12,7 @@ mermaid/blendman.md
 ## VALIDATION & SELF-CHECKS (Validation Gates):
 
 - Every new function, class, or route MUST have Pytest unit tests (expected use, edge, and failure cases).
-- Run `./dev.sh` or `./dev.ps1` after every major change. Never consider a task complete until all validation gates pass.
+- Run `./dev.py` after every major change. Never consider a task complete until all validation gates pass.
 - If a validation gate fails, debug, fix, and re-run until it passes. Document root causes and solutions.
 
 ## OTHER CONSIDERATIONS (Agent Behavior Rules):

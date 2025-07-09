@@ -31,7 +31,7 @@ Design and implement a comprehensive, idiomatic CLI for the blendman program, br
 
 ### Success Criteria (Validation Gates)
 - [ ] All CLI commands have unit tests (happy, edge, and failure cases)
-- [ ] `./dev.sh` passes (lint, type-check, test)
+- [ ] `./dev.py` passes (lint, type-check, test)
 - [ ] All errors are logged and handled
 - [ ] CLI help and subcommands are discoverable and documented
 
@@ -176,7 +176,7 @@ if __name__ == "__main__":
 ## Validation Loop (Agent Self-Validation & Iteration)
 ### Level 1: Syntax & Style
 ```bash
-./dev.sh
+./dev.py
 # Expected: No errors or warnings. If errors/warnings, analyze, fix, and re-run until passing.
 ```
 ### Level 2: Unit Tests

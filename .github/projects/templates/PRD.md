@@ -73,7 +73,7 @@ This template is optimized for autonomous coding agents to deliver robust, produ
 
 ### Level 1: Syntax & Style
 ```bash
-./dev.sh
+./dev.py
 # Expected: No errors or warnings. If errors/warnings, analyze, fix, and re-run until passing.
 ```
 

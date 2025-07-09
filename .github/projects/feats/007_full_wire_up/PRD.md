@@ -16,7 +16,7 @@ Wire up all major modules in the blendman monorepo to enable a full workflow: fi
 - Integrate watcher, event processor, path mapping, and database logging into a seamless workflow.
 - CLI commands must start/stop the watcher, bridge events to the DB, and allow querying logs/state.
 - All new logic must be unit tested (expected, edge, and failure cases).
-- All validation gates must pass (`./dev.sh` or `./dev.ps1`).
+- All validation gates must pass (`./dev.py`).
 - Document the final architecture with mermaid diagrams.
 
 ## Why
@@ -35,7 +35,7 @@ Wire up all major modules in the blendman monorepo to enable a full workflow: fi
 ### Success Criteria (Validation Gates)
 - [ ] All watcher events are logged to the DB and queryable via CLI.
 - [ ] All new functions/classes/routes have Pytest unit tests (expected, edge, failure cases).
-- [ ] `./dev.sh` or `./dev.ps1` passes with no errors.
+- [ ] `./dev.py` passes with no errors.
 - [ ] All code is type-checked (`mypy`), linted (`ruff`), and formatted.
 - [ ] All error cases are handled and logged.
 - [ ] Architecture is documented with mermaid diagrams.
@@ -132,7 +132,7 @@ Wire up all major modules in the blendman monorepo to enable a full workflow: fi
   4. On event, bridge to DB (persist_event).
   5. Expose CLI commands for start/stop/status/query.
   6. Ensure all error cases are logged and tested.
-  7. Validate with `./dev.sh` or `./dev.ps1`.
+  7. Validate with `./dev.py`.
   8. Document architecture with mermaid diagrams.
 
 ## Validation Loop (Agent Self-Validation & Iteration)
@@ -151,7 +151,7 @@ uv run pytest
 
 ### Level 3: Integration & Manual
 ```bash
-./dev.sh  # or ./dev.ps1 on Windows
+./dev.py  # or ./dev.py on Windows
 ```
 
 ## Final validation Checklist

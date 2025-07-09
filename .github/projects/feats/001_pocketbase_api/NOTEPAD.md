@@ -25,7 +25,7 @@
 - Use python-dotenv for env loading; add # type: ignore for mypy.
 - All API errors must be wrapped in custom exceptions.
 - All tests must mock HTTP requests; do not hit real PocketBase.
-- Validation gates: ./dev.sh after every change.
+- Validation gates: ./dev.py after every change.
 - Update README and .env.example as needed.
 
 ---

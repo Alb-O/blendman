@@ -91,7 +91,7 @@ Implement a comprehensive, production-grade Python API system for PocketBase, us
 ### Validation Gates
 ```bash
 uv sync
-./dev.sh
+./dev.py
 ```
 
 ---

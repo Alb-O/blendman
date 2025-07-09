@@ -290,7 +290,7 @@ DEPENDENCIES:
 ### Level 1: Syntax & Style
 ```bash
 # Run this FIRST - fix any errors before proceeding
-./dev.sh
+./dev.py
 
 # Expected: No errors or warnings. If errors/warnings, fix it immediately.
 ```
@@ -357,7 +357,7 @@ uv run python cli.py
 
 
 ## Final Validation Checklist (Agent Self-Validation)
-- [ ] All tests pass, no linting errors, no type errors: `./dev.sh`
+- [ ] All tests pass, no linting errors, no type errors: `./dev.py`
 - [ ] Gmail OAuth flow works (browser opens, token saved)
 - [ ] Brave Search returns results
 - [ ] Research Agent invokes Email Agent successfully

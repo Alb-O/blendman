@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Unified development script for lint, type, and test.
 
-This script replaces the previous dev.sh and dev.ps1 wrappers with a
+This script replaces the previous dev.py and dev.py wrappers with a
 single Python implementation that works on Linux, macOS and Windows.
 """
 

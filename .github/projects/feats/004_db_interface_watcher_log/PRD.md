@@ -23,11 +23,11 @@ Implement a robust, modular interface between the Pocketbase backend package and
 - Use `python-dotenv` and `load_env()` for config/env
 - Provide Pytest unit tests for all logic (expected, edge, failure cases)
 - Document all non-obvious decisions in code/docstrings
-- Validate all changes with `ruff`, `mypy`, and `pytest` via `./dev.sh`
+- Validate all changes with `ruff`, `mypy`, and `pytest` via `./dev.py`
 
 ### Success Criteria (Validation Gates)
 - [ ] All new code is fully unit tested (expected, edge, failure cases)
-- [ ] All validation gates (`ruff`, `mypy`, `pytest`, `./dev.sh`) pass after every change
+- [ ] All validation gates (`ruff`, `mypy`, `pytest`, `./dev.py`) pass after every change
 - [ ] No file exceeds 500 lines
 - [ ] All errors are handled and logged; no unhandled exceptions
 - [ ] Documentation and .env.example are updated if needed
@@ -161,7 +161,7 @@ README.md                 # Update with setup/integration notes
    - Mock watcher events for unit tests
    - Validate DB state and log queries after each event
 5. **Validation**
-   - Run `./dev.sh` after every change
+   - Run `./dev.py` after every change
    - Fix all lint/type/test errors before proceeding
 
 ### Error Handling
@@ -172,7 +172,7 @@ README.md                 # Update with setup/integration notes
 
 ### Validation Loop
 ```bash
-./dev.sh
+./dev.py
 ```
 
 ---
