@@ -122,7 +122,7 @@ class Watcher:
 
             def on_created(self, event: Any) -> None:
                 """Handle file/directory creation event."""
-                logger.debug("Raw event created", path=event.src_path)
+                logger.debug("Raw event created: path=%r", event.src_path)
                 # Accessing protected member is fine in this internal callback.
                 parent._handle_raw_event(  # pylint: disable=protected-access
                     {
@@ -134,7 +134,7 @@ class Watcher:
 
             def on_deleted(self, event: Any) -> None:
                 """Handle file/directory deletion event."""
-                logger.debug("Raw event deleted", path=event.src_path)
+                logger.debug("Raw event deleted: path=%r", event.src_path)
                 parent._handle_raw_event(  # pylint: disable=protected-access
                     {
                         "type": "deleted",
@@ -146,9 +146,9 @@ class Watcher:
             def on_moved(self, event: Any) -> None:
                 """Handle file/directory move event."""
                 logger.debug(
-                    "Raw event moved",
-                    src=event.src_path,
-                    dest=getattr(event, "dest_path", None),
+                    "Raw event moved: src=%r dest=%r",
+                    event.src_path,
+                    getattr(event, "dest_path", None),
                 )
                 parent._handle_raw_event(  # pylint: disable=protected-access
                     {
@@ -173,11 +173,11 @@ class Watcher:
         Args:
             event (dict[str, Any]): The event dictionary.
         """
-        logger.debug("Handling raw event", event=event)
+        logger.debug("Handling raw event: %r", event)
         # Optionally filter with matcher
         path = event.get("src_path") or event.get("dest_path")
         if self.matcher and path and not self.matcher(path):
-            logger.debug("Event filtered by matcher", path=path)
+            logger.debug("Event filtered by matcher: path=%r", path)
             return
         # Track inodes for created files
         if event["type"] == "created" and not event.get("is_directory"):
@@ -185,14 +185,14 @@ class Watcher:
                 inode = os.stat(event["src_path"]).st_ino
                 self._path_map.add(event["src_path"], inode)
                 logger.debug(
-                    "Added inode mapping",
-                    path=event["src_path"],
-                    inode=inode,
+                    "Added inode mapping: path=%r inode=%r",
+                    event["src_path"],
+                    inode,
                 )
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 # Broad exception is justified: stat may fail for race conditions
                 # so we do not break the event flow.
-                logger.warning("Failed to stat created file", error=str(exc))
+                logger.warning("Failed to stat created file: error=%r", str(exc))
         self._event_processor.process(event)
 
     def _emit_high_level(self, _event_type: str, _payload: dict[str, Any]) -> None:
