@@ -36,7 +36,7 @@ def get_toml_config() -> Dict[str, Any]:
         with open(config_path, "rb") as f:
             config = tomli.load(f)
             return config
-    except (OSError, tomli.TOMLDecodeError) as e:  # Only catch file/parse errors
+    except (OSError, tomli.TOMLDecodeError):  # Only catch file/parse errors
         # Fallback to empty config if TOML is invalid
         return {}
 

@@ -10,7 +10,7 @@ import sys
 import importlib
 from pathlib import Path
 from typing import Any
-import pytest # type: ignore
+import pytest  # type: ignore
 
 
 def reload_config_module() -> Any:
