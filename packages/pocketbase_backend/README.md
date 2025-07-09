@@ -18,7 +18,7 @@ This package provides a modular Python API client for [PocketBase](https://pocke
 
 3. Run validation gates:
 
-    `./dev.sh`
+    `python dev.py`
 
 ## Environment Variables
 

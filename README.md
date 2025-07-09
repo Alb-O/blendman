@@ -64,7 +64,7 @@ Copy `.env.example` to `.env` and set:
 Run all validation steps with one command:
 
 ```sh
-./dev.sh
+python dev.py
 ```
 
 ## Automation & CI
@@ -105,7 +105,7 @@ This repo includes `.github/workflows/ci.yml` to run lint, type-check, and tests
 2. Install dependencies:
   - `pip install -r requirements.txt` (or use `uv`/`venv_linux` as per project)
 3. Run validation:
-  - `./dev.sh` (Linux/macOS) or `./dev.ps1` (Windows)
+  - `python dev.py`
 
 ## Security Notes
 
@@ -125,7 +125,7 @@ This repo includes `.github/workflows/ci.yml` to run lint, type-check, and tests
 
 ## Validation
 - All new logic is covered by Pytest unit tests (expected, edge, and failure cases).
-- Run `./dev.sh` or `./dev.ps1` after every major change; all validation gates must pass.
+- Run `python dev.py` after every major change; all validation gates must pass.
 - No hardcoded secrets; all config via environment variables.
 - All code is type-checked (`mypy`), linted (`ruff`), and formatted.
 

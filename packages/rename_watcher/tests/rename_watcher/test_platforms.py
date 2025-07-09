@@ -6,6 +6,7 @@ Platform-specific and real-filesystem tests for rename_watcher (Linux, Windows, 
 
 import os
 import sys
+
 import pytest
 from pyfakefs.fake_filesystem_unittest import Patcher
 
@@ -62,5 +63,8 @@ def test_fsevents_event_coalescing():
         # Simulate rapid file changes
         for i in range(100):
             fname = f"file_{i}.txt"
-            fs.create_file(os.path.join(root, fname), contents="x")  # type: ignore[attr-defined,union-attr]
+            fs.create_file(
+                os.path.join(root, fname),
+                contents="x",
+            )  # type: ignore[attr-defined,union-attr]
         # No assertion: just ensure no crash/hang

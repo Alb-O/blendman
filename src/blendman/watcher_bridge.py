@@ -4,17 +4,20 @@ Bridge between RenameWatcher events and DB operations.
 Subscribes to RenameWatcher events and persists them using the DB interface.
 """
 
-from packages.rename_watcher.src.rename_watcher.api import RenameWatcherAPI
-from .db_interface import DBInterface
+import os
 import structlog  # type: ignore
+from rename_watcher.api import RenameWatcherAPI
+from pocketbase.exceptions import PocketBaseError
+from .db_interface import DBInterface
 
 
 class WatcherBridge:
-    """
-    Bridge class to subscribe to watcher events and persist them in the DB.
-    """
+    """Bridge class to subscribe to watcher events and persist them in the DB."""
 
-    def __init__(self, db_interface: DBInterface, path: str = None, matcher=None):
+    def __init__(
+        self, db_interface: DBInterface, path: str | None = None, matcher=None
+    ) -> None:
+        """Initialize the bridge with the given DB interface and watcher settings."""
         self.db_interface = db_interface
         self.logger = structlog.get_logger("WatcherBridge")
         self.watcher = RenameWatcherAPI(path=path, matcher=matcher)
@@ -33,18 +36,11 @@ class WatcherBridge:
             "[WatcherBridge] Subscribed to watcher events and started watcher."
         )
 
-    def handle_event(self, event: dict):
-        import os
-
+    def handle_event(self, event: dict) -> None:
+        """Handle a watcher event and persist it using the DB interface."""
         self.logger.info(
             "[WatcherBridge] handle_event called", pid=os.getpid(), event_data=event
         )
-        """
-        Handle a watcher event and persist it using the DB interface.
-
-        Args:
-            event (dict): The watcher event.
-        """
         self.logger.info(f"[WatcherBridge] Received event: {event}")
         try:
             # Transform event to match DBInterface.persist_event schema
@@ -76,7 +72,9 @@ class WatcherBridge:
             self.logger.info(f"[WatcherBridge] Transformed event for DB: {transformed}")
             self.db_interface.persist_event(transformed)
             self.logger.info(f"[WatcherBridge] Event persisted to DB: {transformed}")
-        except Exception as e:
+        except PocketBaseError as exc:
             self.logger.error(
-                f"[WatcherBridge] Failed to persist watcher event: {event} | Error: {e}"
+                "[WatcherBridge] Failed to persist watcher event",
+                event_data=event,
+                error=str(exc),
             )

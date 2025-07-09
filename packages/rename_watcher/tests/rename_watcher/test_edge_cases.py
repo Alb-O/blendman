@@ -2,6 +2,9 @@
 Explicit edge-case and failure mode tests for rename_watcher.
 """
 
+# Broad exceptions are expected for robustness
+# pylint: disable=broad-exception-caught
+
 # See utils.py for shared helpers and data generators.
 
 import os

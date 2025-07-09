@@ -1,45 +1,13 @@
 {
 	"version": "2.0.0",
 	"tasks": [
-		{
-			"type": "shell",
-			"label": "Run all checks (dev.ps1)",
-			"command": "./dev.ps1",
-			"args": [],
-			"group": "test",
-			"isBackground": false,
-			"problemMatcher": [],
-			"windows": {
-				"command": "pwsh",
-				"args": [
-					"-NoProfile",
-					"-ExecutionPolicy",
-					"Bypass",
-					"-File",
-					"./dev.ps1"
-				]
-			}
-		},
-		{
-			"type": "shell",
-			"label": "Run all checks (dev.sh)",
-			"command": "./dev.sh",
-			"args": [],
-			"group": "test",
-			"isBackground": false,
-			"problemMatcher": [],
-			"linux": {
-				"command": "/bin/bash",
-				"args": [
-					"./dev.sh"
-				]
-			},
-			"osx": {
-				"command": "/bin/bash",
-				"args": [
-					"./dev.sh"
-				]
-			}
-		}
-	]
-}
+                {
+                        "type": "shell",
+                        "label": "Run all checks",
+                        "command": "python",
+                        "args": ["dev.py"],
+                        "group": "test",
+                        "isBackground": false,
+                        "problemMatcher": []
+                }
+        ]}

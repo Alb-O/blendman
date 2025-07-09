@@ -20,4 +20,4 @@ jobs:
       - name: Install dependencies
         run: uv sync
       - name: Unified check (format, lint, type-check, test)
-        run: ./dev.sh
+        run: python dev.py

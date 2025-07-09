@@ -51,7 +51,7 @@ class AuthClient:
             resp = requests.post(url, json=data, timeout=10)
             if resp.status_code != 200:
                 raise PocketBaseAuthError(
-                    "Login failed: %s %s" % (resp.status_code, resp.text)
+                    f"Login failed: {resp.status_code} {resp.text}"
                 )
             result = resp.json()
             token = result.get("token")
@@ -75,12 +75,12 @@ class AuthClient:
         Returns:
             Optional[str]: Auth token or None if not implemented.
         """
-        result = self.mfa_client.login_with_otp(identity, otp)
-        if isinstance(result, dict) and "token" in result:
-            self.token_manager.set_token(result["token"])
-            self.user = result.get("record")
-            return result["token"]
-        return None
+        result = self.mfa_client.login_with_otp(identity, otp) or {}
+        if "token" not in result:
+            return None
+        self.token_manager.set_token(result["token"])
+        self.user = result.get("record")
+        return result["token"]
 
     def login_with_oauth2(
         self, provider: str, code: str, redirect_uri: str
@@ -96,12 +96,12 @@ class AuthClient:
         Returns:
             Optional[str]: Auth token or None if not implemented.
         """
-        result = self.mfa_client.login_with_oauth2(provider, code, redirect_uri)
-        if isinstance(result, dict) and "token" in result:
-            self.token_manager.set_token(result["token"])
-            self.user = result.get("record")
-            return result["token"]
-        return None
+        result = self.mfa_client.login_with_oauth2(provider, code, redirect_uri) or {}
+        if "token" not in result:
+            return None
+        self.token_manager.set_token(result["token"])
+        self.user = result.get("record")
+        return result["token"]
 
     def impersonate(self, user_id: str, superuser_token: Optional[str] = None) -> str:
         """
@@ -126,7 +126,7 @@ class AuthClient:
             resp = requests.post(url, headers=headers, timeout=10)
             if resp.status_code != 200:
                 raise PocketBaseAuthError(
-                    "Impersonation failed: %s %s" % (resp.status_code, resp.text)
+                    f"Impersonation failed: {resp.status_code} {resp.text}"
                 )
             result = resp.json()
             imp_token = result.get("token")
@@ -158,7 +158,7 @@ class AuthClient:
             resp = requests.post(url, headers=headers, timeout=10)
             if resp.status_code != 200:
                 raise PocketBaseAuthError(
-                    "Token refresh failed: %s %s" % (resp.status_code, resp.text)
+                    f"Token refresh failed: {resp.status_code} {resp.text}"
                 )
             result = resp.json()
             new_token = result.get("token")
