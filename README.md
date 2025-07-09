@@ -5,10 +5,20 @@ Blendman is a CLI tool for managing Blender-related workflows and PocketBase int
 
 ## Quickstart
 
-### 1. Install dependencies
+
+### 1. Set up a virtual environment and install dependencies
 
 ```sh
+# Create and activate a virtual environment (fish shell)
+uv venv .venv
+source .venv/bin/activate.fish
+
+# Install main dependencies
 uv pip install -e .
+
+# Install local packages in editable mode
+uv pip install -e packages/rename_watcher
+uv pip install -e packages/pocketbase_backend
 ```
 
 ### 2. Set up environment variables
@@ -24,16 +34,24 @@ if it doesn't already exist.
 
 ### 3. Run the CLI
 
-From the project root, set up your environment (for bash, zsh, etc.):
+
+
+From the project root, activate your virtual environment and set the `PYTHONPATH`:
 
 ```sh
-# Activate your virtual environment
-. .venv/bin/activate
-# Set the Python path for local packages
+# For bash/zsh:
+source .venv/bin/activate
 export PYTHONPATH=src:packages/rename_watcher/src:packages/pocketbase_backend/src
-# See available commands
+
+# For fish shell:
+source .venv/bin/activate.fish
+set -x PYTHONPATH src:packages/rename_watcher/src:packages/pocketbase_backend/src
+
+# Run the CLI (works in any shell after activation and PYTHONPATH set)
 python -m blendman.cli --help
 ```
+
+> **Note:** Use `export` for bash/zsh, and `set -x` for fish. Adjust activation and environment commands as needed for your shell.
 
 Replace `--help` with any command you want to run. For example:
 
@@ -61,7 +79,8 @@ Replace `--help` with any command you want to run. For example:
   python -m blendman.cli pocketbase superuser admin@example.com password
   ```
 
-> **Tip:** If you use a different shell or platform, adapt the activation and environment variable commands as needed.
+
+> **Tip:** If you use a different shell or platform, adapt the activation and environment variable commands as needed. For fish shell, use `set -x` instead of `export`.
 
 ---
 

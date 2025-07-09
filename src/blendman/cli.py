@@ -2,8 +2,8 @@
 Main Typer CLI app for blendman.
 """
 
-import typer  # type: ignore
-from rich.console import Console  # type: ignore
+import typer
+from rich.console import Console
 from blendman.commands.watcher import watcher_app
 from blendman.commands.config import config_app
 from blendman.commands.backend import backend_app

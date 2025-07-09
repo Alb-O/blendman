@@ -1,9 +1,10 @@
 [tool.uv.workspace]
-members = ["packages/*"]
+members = ["packages/rename_watcher", "packages/pocketbase_backend"]
+
 [project]
 name = "blendman"
 version = "0.1.0"
-description = "Add your description here"
+description = "Blendman CLI for Blender workflows and PocketBase integration."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [

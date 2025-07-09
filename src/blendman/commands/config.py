@@ -11,13 +11,13 @@ def create_default_config(path: str, app_console: Console | None = None) -> None
     """Create a default TOML config if it doesn't already exist."""
     app_console = app_console or Console()
     default_config = """
+priority = "include"
+
 [include]
 patterns = [".blend"]
 
 [ignore]
-patterns = ["*"]
-
-priority = "include"
+patterns = ["*"]priority = "include"
 """
     if os.path.exists(path):
         app_console.print(f"[yellow]Config file already exists at {path}.")
