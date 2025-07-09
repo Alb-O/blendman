@@ -8,33 +8,64 @@ This project uses [uv workspaces](https://docs.astral.sh/uv/concepts/projects/wo
 - `packages/pocketbase/`: Contains the PocketBase binary manager package.
 - `src/blendman/`: Main application code and CLI entry points.
 
-## Workflow
+## Quickstart: Blendman CLI
 
-
-### Install all dependencies (including dev tools)
+### 1. Install all dependencies (including dev tools)
 
 ```sh
 uv pip install -e .
 ```
 
-### Unified development check (lint, type-check, test)
+### 2. Create a default watcher config (optional)
+
+```sh
+python -m src.blendman.cli config init --path watcher_config.toml
+```
+
+### 3. Run the CLI and see available commands
+
+```sh
+python -m src.blendman.cli --help
+```
+
+### 4. Example CLI usage
+
+- **Start the watcher:**
+  ```sh
+  python -m src.blendman.cli watcher start --config-path watcher_config.toml
+  ```
+- **Check watcher status:**
+  ```sh
+  python -m src.blendman.cli watcher status
+  ```
+- **Query backend logs:**
+  ```sh
+  python -m src.blendman.cli backend query logs
+  ```
+- **Open PocketBase dashboard UI:**
+  ```sh
+  python -m src.blendman.cli pocketbase ui
+  ```
+- **Create a PocketBase superuser:**
+  ```sh
+  python -m src.blendman.cli pocketbase superuser admin@example.com password
+  ```
+
+### 5. Environment variables
+
+Copy `.env.example` to `.env` and set:
+- `POCKETBASE_URL`
+- `POCKETBASE_ADMIN_EMAIL`
+- `POCKETBASE_ADMIN_PASSWORD`
+- `WATCHER_CONFIG` (optional)
+
+## Unified development check (lint, type-check, test)
 
 Run all validation steps with one command:
 
 ```sh
 ./dev.sh
 ```
-
-### Run the PocketBase manager CLI
-
-```sh
-uv run --package pocketbase pocketbase-manager start --port 8090
-```
-
-### Add a new package
-
-- Create a new directory under `packages/` with its own `pyproject.toml` and `src/`.
-- Add it to the `members` list in the root `pyproject.toml` if not using a glob.
 
 ## Automation & CI
 
@@ -53,11 +84,6 @@ This repo includes `.github/workflows/ci.yml` to run lint, type-check, and tests
 
 ---
 
-### Add a new package
-
-- Create a new directory under `packages/` with its own `pyproject.toml` and `src/`.
-- Add it to the `members` list in the root `pyproject.toml` if not using a glob.
-
 ## Best Practices
 
 - Use `[tool.uv.sources]` for local package dependencies.
@@ -65,8 +91,6 @@ This repo includes `.github/workflows/ci.yml` to run lint, type-check, and tests
 - Use `uv run` and `uv pip` from the workspace root for all operations.
 
 ---
-
-See [uv workspace docs](https://docs.astral.sh/uv/concepts/projects/workspaces/) for more details.
 
 See [uv workspace docs](https://docs.astral.sh/uv/concepts/projects/workspaces/) for more details.
 

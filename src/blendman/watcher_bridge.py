@@ -4,7 +4,7 @@ Bridge between RenameWatcher events and DB operations.
 Subscribes to RenameWatcher events and persists them using the DB interface.
 """
 
-from rename_watcher.api import RenameWatcherAPI
+from packages.rename_watcher.src.rename_watcher.api import RenameWatcherAPI
 from .db_interface import DBInterface
 import logging
 
