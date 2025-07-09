@@ -7,7 +7,7 @@ Exposes APIs for persisting and querying file/dir state and rename logs.
 from typing import List, Optional
 from packages.pocketbase_backend.src.pocketbase.api import PocketBaseAPI
 from packages.pocketbase_backend.src.pocketbase.auth import AuthClient
-import structlog
+import structlog  # type: ignore
 import os
 
 

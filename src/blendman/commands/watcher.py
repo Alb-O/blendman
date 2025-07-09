@@ -6,7 +6,7 @@ import sys
 import os
 import typer  # type: ignore
 from rich.console import Console  # type: ignore
-import structlog
+import structlog  # type: ignore
 
 import subprocess
 import platform
