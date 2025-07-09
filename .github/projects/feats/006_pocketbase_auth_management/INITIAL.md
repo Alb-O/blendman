@@ -1,15 +1,15 @@
 
 ## FEATURE (Agent Mission & Priorities):
 
-[Describe the feature to be built. Be explicit about the end goal, required behaviors, and success criteria.]
-
-## EXAMPLES (Context Awareness):
-
-[List and explain all relevant examples in the `examples/` folder. Specify what patterns or best practices should be extracted and adapted.]
+Critique the current implementation of blendman's attempt at authenticating with pocketbase. A completely new method of auth needs to be implemented, focusing on best practices and security for connecting to APIs. CRITICAL: You MUST research the documentation below to get the full picture of how to implement. Remember, you are to research, plan, draft, brainstorm and write the PRD only.
 
 ## DOCUMENTATION (Critical Context):
 
-[List all documentation, API references, and resources that must be used. Include URLs and file paths.]
+#githubRepo pocketbase/pocketbase
+
+#fetch https://pocketbase.io/docs/authentication/
+
+#fetch https://pocketbase.io/docs/api-records/#auth-with-password
 
 ## VALIDATION & SELF-CHECKS (Validation Gates):
 
