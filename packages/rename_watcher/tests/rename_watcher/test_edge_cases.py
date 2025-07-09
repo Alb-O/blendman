@@ -6,8 +6,8 @@ Explicit edge-case and failure mode tests for rename_watcher.
 
 import os
 from typing import Any
-import pytest
-from pyfakefs.fake_filesystem_unittest import Patcher
+import pytest  # type: ignore
+from pyfakefs.fake_filesystem_unittest import Patcher  # type: ignore
 from . import utils
 
 
@@ -71,9 +71,9 @@ def test_unicode_and_reserved_names(name: str) -> None:
         assert os.path.exists(fpath)
 
 
-def test_symlink_and_hardlink():
+def test_symlink_and_hardlink_block1():
     """
-    Test watcher with symlinks and hardlinks (pyfakefs partial support).
+    Test watcher with symlinks and hardlinks (pyfakefs partial support), block 1.
     """
     with Patcher() as patcher:
         fs: Any = patcher.fs
@@ -88,6 +88,14 @@ def test_symlink_and_hardlink():
         hardlink = os.path.join(root, "hardlink.txt")
         os.link(target, hardlink)
         assert os.path.exists(hardlink)
+
+
+def test_symlink_and_hardlink_block2():
+    """
+    Test watcher with symlinks and hardlinks (pyfakefs partial support), block 2.
+    """
+    with Patcher() as patcher:
+        fs: Any = patcher.fs
         root = "/edgecase"
         fs.makedirs(root, exist_ok=True)
         target = os.path.join(root, "target.txt")
@@ -101,9 +109,9 @@ def test_symlink_and_hardlink():
         assert os.path.exists(hardlink)
 
 
-def test_permission_errors():
+def test_permission_errors_block1():
     """
-    Test watcher with permission errors (read-only file/dir).
+    Test watcher with permission errors (read-only file/dir), block 1.
     """
     with Patcher() as patcher:
         fs: Any = patcher.fs
@@ -118,6 +126,14 @@ def test_permission_errors():
             assert False, "Should not be able to write to read-only file"
         except Exception:
             pass
+
+
+def test_permission_errors_block2():
+    """
+    Test watcher with permission errors (read-only file/dir), block 2.
+    """
+    with Patcher() as patcher:
+        fs: Any = patcher.fs
         root = "/edgecase"
         fs.makedirs(root, exist_ok=True)
         fpath = os.path.join(root, "readonly.txt")

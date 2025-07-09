@@ -26,7 +26,8 @@ if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
 # Check for mypy in uv
 try {
     uv run mypy --version | Out-Null
-} catch {
+}
+catch {
     Abort "Error: 'mypy' is not installed in uv environment. Aborting."
 }
 
@@ -42,12 +43,19 @@ if ($Mode -eq "--pylint") {
     $PY_FILES += & git ls-files --others --exclude-standard '*.py'
     if (-not $PY_FILES) {
         Write-Color $YELLOW "No Python files found for pylint."
-    } else {
-        Write-Color $YELLOW "PYTHONPATH for pylint: $PYTHONPATH"
+    }
+    else {
+        if (-not $PYTHONPATH) {
+            Write-Color $YELLOW "Warning: PYTHONPATH is empty. Pylint may not resolve imports correctly. Check .vscode/settings.json or dev.ps1 logic."
+        }
+        else {
+            Write-Color $YELLOW "PYTHONPATH for pylint: $PYTHONPATH"
+        }
         $env:PYTHONPATH = $PYTHONPATH
         if (uv run pylint --output-format=colorized $PY_FILES) {
             Write-Color $GREEN "Pylint checks passed!"
-        } else {
+        }
+        else {
             Abort "Pylint checks failed!"
         }
     }
@@ -69,17 +77,19 @@ foreach ($SRC_DIR in $SRC_ROOTS) {
     Write-Color $NC "Type checking main source code: $SRC_DIR ..."
     if (uv run mypy $SRC_DIR) {
         Write-Color $GREEN "Main source code: PASSED ($SRC_DIR)"
-    } else {
+    }
+    else {
         Abort "Main source code: FAILED ($SRC_DIR)"
     }
     $PKG_ROOT = Split-Path (Split-Path $SRC_DIR -Parent) -Parent
     $TEST_DIR = Join-Path $PKG_ROOT 'tests'
     if (Test-Path $TEST_DIR) {
         Write-Color $NC "Type checking tests in $TEST_DIR with src in MYPYPATH..."
-    $env:MYPYPATH = "$PKG_ROOT/src;$PKG_ROOT"
+        $env:MYPYPATH = "$PKG_ROOT/src;$PKG_ROOT"
         if (uv run mypy $TEST_DIR) {
             Write-Color $GREEN "Tests in ${TEST_DIR}: PASSED"
-        } else {
+        }
+        else {
             Abort "Tests in ${TEST_DIR}: FAILED"
         }
     }
@@ -100,7 +110,7 @@ foreach ($SRC in $SRC_DIRS) {
 Write-Color $GREEN "All mypy checks passed!"
 
 # --- Pylint section: use python.analysis.extraPaths for PYTHONPATH ---
-Write-Color $YELLOW "Running pylint with VSCode extraPaths..."
+Write-Color $NC "Running pylint with VSCode extraPaths..."
 if (-not (Get-Command jq -ErrorAction SilentlyContinue)) {
     Abort "Error: 'jq' is required to parse .vscode/settings.json. Aborting.\nInstall it with: winget install jqlang.jq"
 }
@@ -111,12 +121,19 @@ $PY_FILES += & git ls-files '*.py'
 $PY_FILES += & git ls-files --others --exclude-standard '*.py'
 if (-not $PY_FILES) {
     Write-Color $YELLOW "No Python files found for pylint."
-} else {
-    Write-Color $YELLOW "PYTHONPATH for pylint: $PYTHONPATH"
+}
+else {
+    if (-not $PYTHONPATH) {
+        Write-Color $YELLOW "Warning: PYTHONPATH is empty. Pylint may not resolve imports correctly. Check .vscode/settings.json or dev.ps1 logic."
+    }
+    else {
+        Write-Color $NC "PYTHONPATH for pylint: $PYTHONPATH"
+    }
     $env:PYTHONPATH = $PYTHONPATH
     if (uv run pylint --output-format=colorized $PY_FILES) {
         Write-Color $GREEN "Pylint checks passed!"
-    } else {
+    }
+    else {
         Abort "Pylint checks failed!"
     }
 }

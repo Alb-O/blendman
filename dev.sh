@@ -34,6 +34,10 @@ if [ "${1-}" = "--pylint" ]; then
   done
   PYTHONPATH=${PYTHONPATH#:} # Remove leading colon
 
+  if [ -z "$PYTHONPATH" ]; then
+    printf "%b\n" "${YELLOW}Warning: PYTHONPATH is empty. Pylint may not resolve imports correctly. Check .vscode/settings.json or dev.sh logic.${NC}"
+  fi
+
   PY_FILES=$(git ls-files '*.py'; git ls-files --others --exclude-standard '*.py')
 
   if [ -z "$PY_FILES" ]; then
@@ -103,7 +107,7 @@ done
 printf "%b\n" "${GREEN}All mypy checks passed!${NC}"
 
 # --- Pylint section: use python.analysis.extraPaths for PYTHONPATH ---
-printf "%b\n" "${YELLOW}Running pylint with VSCode extraPaths...${NC}"
+printf "%b\n" "${NC}Running pylint with VSCode extraPaths...${NC}"
 
 # Extract extraPaths from .vscode/settings.json (assumes jq is installed)
 if ! command -v jq >/dev/null 2>&1; then
@@ -124,7 +128,11 @@ PY_FILES=$(git ls-files '*.py'; git ls-files --others --exclude-standard '*.py')
 if [ -z "$PY_FILES" ]; then
   printf "%b\n" "${YELLOW}No Python files found for pylint.${NC}"
 else
-  printf "%b\n" "${YELLOW}PYTHONPATH for pylint: $PYTHONPATH${NC}"
+  if [ -z "$PYTHONPATH" ]; then
+    printf "%b\n" "${YELLOW}Warning: PYTHONPATH is empty. Pylint may not resolve imports correctly. Check .vscode/settings.json or dev.sh logic.${NC}"
+  else
+    printf "%b\n" "${NC}PYTHONPATH for pylint: $PYTHONPATH${NC}"
+  fi
   if PYTHONPATH="$PYTHONPATH" uv run pylint --output-format=colorized $PY_FILES; then
     printf "%b\n" "${GREEN}Pylint checks passed!${NC}"
   else
