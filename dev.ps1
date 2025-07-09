@@ -73,6 +73,7 @@ if (-not $SRC_ROOTS) {
     Abort "No src/* package roots with __init__.py found. Aborting."
 }
 
+
 foreach ($SRC_DIR in $SRC_ROOTS) {
     Write-Color $NC "Type checking main source code: $SRC_DIR ..."
     if (uv run mypy $SRC_DIR) {
@@ -106,6 +107,11 @@ foreach ($SRC in $SRC_DIRS) {
         uv run pytest $TEST_DIR
     }
 }
+
+# Always run blendman tests with full PYTHONPATH
+Write-Color $NC "Running pytest for tests/blendman with PYTHONPATH=src;packages/pocketbase_backend/src;packages/rename_watcher/src ..."
+$env:PYTHONPATH = "src;packages/pocketbase_backend/src;packages/rename_watcher/src"
+uv run pytest tests/blendman -v
 
 Write-Color $GREEN "All mypy checks passed!"
 

@@ -104,6 +104,11 @@ for SRC_DIR in $(find ./packages -type d -path "*/src" | grep -v "/\\." | grep -
   fi
 done
 
+
+# Always run blendman tests with full PYTHONPATH
+printf "%b\n" "${NC}Running pytest for tests/blendman with PYTHONPATH=src:packages/pocketbase_backend/src:packages/rename_watcher/src ...${NC}"
+PYTHONPATH="src:packages/pocketbase_backend/src:packages/rename_watcher/src" uv run pytest tests/blendman -v
+
 printf "%b\n" "${GREEN}All mypy checks passed!${NC}"
 
 # --- Pylint section: use python.analysis.extraPaths for PYTHONPATH ---
