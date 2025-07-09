@@ -17,7 +17,7 @@ priority = "include"
 patterns = [".blend"]
 
 [ignore]
-patterns = ["*"]priority = "include"
+patterns = ["*"]
 """
     if os.path.exists(path):
         app_console.print(f"[yellow]Config file already exists at {path}.")
