@@ -80,14 +80,16 @@ def test_is_authenticated_valid_token():
     client.token_manager.set_token("tok")
     mock_resp = MagicMock()
     mock_resp.status_code = 200
-    with patch("pocketbase.auth.requests.post", return_value=mock_resp):
+    with patch("pocketbase.auth.requests.post", side_effect=[mock_resp]):
         assert client.is_authenticated()
 
 
 def test_is_authenticated_invalid_token():
     client = AuthClient()
     client.token_manager.set_token("tok")
-    mock_resp = MagicMock()
-    mock_resp.status_code = 401
-    with patch("pocketbase.auth.requests.post", return_value=mock_resp):
+    resp1 = MagicMock()
+    resp1.status_code = 401
+    resp2 = MagicMock()
+    resp2.status_code = 401
+    with patch("pocketbase.auth.requests.post", side_effect=[resp1, resp2]):
         assert not client.is_authenticated()

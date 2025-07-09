@@ -152,10 +152,19 @@ class AuthClient:
         token = self.token_manager.get_token()
         if not token:
             raise PocketBaseAuthError("No token to refresh.")
-        url = f"{self.base_url}/api/collections/users/auth-refresh"
+        user_url = f"{self.base_url}/api/collections/users/auth-refresh"
+        admin_url = f"{self.base_url}/api/collections/_superusers/auth-refresh"
         headers = {"Authorization": token}
         try:
-            resp = requests.post(url, headers=headers, timeout=10)
+            resp = requests.post(user_url, headers=headers, timeout=10)
+            if resp.status_code == 200:
+                result = resp.json()
+                new_token = result.get("token")
+                if not new_token:
+                    raise PocketBaseAuthError("No token returned from refresh.")
+                self.token_manager.set_token(new_token)
+                return new_token
+            resp = requests.post(admin_url, headers=headers, timeout=10)
             if resp.status_code != 200:
                 raise PocketBaseAuthError(
                     f"Token refresh failed: {resp.status_code} {resp.text}"
@@ -175,10 +184,18 @@ class AuthClient:
         token = self.token_manager.get_token()
         if not token:
             return False
-        url = f"{self.base_url}/api/collections/users/auth-refresh"
+        user_url = f"{self.base_url}/api/collections/users/auth-refresh"
+        admin_url = f"{self.base_url}/api/collections/_superusers/auth-refresh"
         try:
             resp = requests.post(
-                url,
+                user_url,
+                headers={"Authorization": token},
+                timeout=5,
+            )
+            if resp.status_code == 200:
+                return True
+            resp = requests.post(
+                admin_url,
                 headers={"Authorization": token},
                 timeout=5,
             )
