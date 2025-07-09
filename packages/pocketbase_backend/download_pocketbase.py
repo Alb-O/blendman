@@ -10,6 +10,11 @@ import zipfile
 import tempfile
 from typing import Any, Dict, Tuple
 import requests
+import typer
+from rich.console import Console
+
+console = Console()
+app = typer.Typer()
 
 
 def get_latest_release():
@@ -85,10 +90,9 @@ def download_and_place(url: str, asset_name: str, dest_path: str) -> None:
         os.chmod(dest_path, 0o755)
 
 
-def main() -> None:
-    """
-    Main entry point: Download and place the latest PocketBase binary for the current platform.
-    """
+@app.command()
+def download() -> None:
+    """Download and place the latest PocketBase binary for the current platform."""
     release = get_latest_release()
     system = platform.system().lower()
     arch = platform.machine().lower()
@@ -106,9 +110,14 @@ def main() -> None:
     arch = "amd64" if "64" in arch else arch
     asset_url, asset_name = get_asset_url(release, platform_name, arch)
     dest = os.path.join(os.path.dirname(__file__), f"pocketbase_bin{ext}")
-    print(f"Downloading PocketBase from {asset_url} to {dest} ...")
+    console.print(f"[cyan]Downloading PocketBase from {asset_url} to {dest} ...")
     download_and_place(asset_url, asset_name, dest)
-    print("PocketBase binary downloaded and ready.")
+    console.print("[green]PocketBase binary downloaded and ready.")
+
+
+def main() -> None:
+    """Run the Typer CLI."""
+    app()
 
 
 if __name__ == "__main__":
