@@ -40,7 +40,7 @@ def test_config_init(tmp_path):
 def test_watcher_status():
     result = runner.invoke(app, ["watcher", "status"])
     assert result.exit_code == 0
-    assert "Status command is not implemented" in result.output
+    assert "Watcher is not running" in result.output
 
 
 def test_backend_manage():

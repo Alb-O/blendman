@@ -30,7 +30,9 @@ class TestFileDirModel:
         assert obj.name == "файл.txt"
 
     def test_failure_missing_field(self):
-        with pytest.raises(TypeError):
+        from pydantic import ValidationError  # type: ignore
+
+        with pytest.raises(ValidationError):
             FileDirModel(
                 id="3", name="bar", path="/bar", type="file", created_at=datetime.now()
             )

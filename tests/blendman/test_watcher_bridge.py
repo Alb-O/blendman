@@ -24,6 +24,9 @@ class DummyWatcher:
         if self.callback:
             self.callback(event)
 
+    def start(self):
+        pass
+
 
 @pytest.fixture
 def bridge():
@@ -49,8 +52,8 @@ def test_expected_event(bridge):
 def test_edge_empty_event(bridge):
     bridge, db = bridge
     bridge.start()
-    with pytest.raises(KeyError):
-        bridge.watcher.emit({})
+    bridge.watcher.emit({})
+    assert db.persisted == []
 
 
 def test_failure_db_error(bridge, caplog):
