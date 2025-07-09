@@ -28,7 +28,7 @@ def _print_logo() -> None:
             ascii_logo,
             style="bold blue",
             width=75,
-            subtitle="Welcome to Blendman CLI. Type 'help' for commands.",
+            subtitle="Welcome to Blendman CLI. Type <help> for commands.",
         )
     )
 
@@ -67,7 +67,7 @@ def interactive_shell() -> None:
 
     style = Style.from_dict(
         {
-            "prompt": "bold fg:ansicyan",
+            "prompt": "bold ansicyan",
             "bottom-toolbar": "fg:ansiwhite nobold",
         }
     )
@@ -90,8 +90,7 @@ def interactive_shell() -> None:
         try:
             line = session.prompt()
         except (EOFError, KeyboardInterrupt):
-            # No rich console needed here, just break
-            print()  # Use regular print for a newline
+            console.print()
             break
         if not line.strip():
             continue
@@ -113,13 +112,11 @@ def interactive_shell() -> None:
             app(args, standalone_mode=False)
         except click.UsageError:
             # Friendly error for unknown commands
-            console = Console()
             console.print(
                 f"[yellow]Unknown command:[/] '{' '.join(args)}'\nType 'help' or exit."
             )
         except SystemExit as exc:  # pragma: no cover - handled gracefully
             if exc.code != 0:
-                console = Console()
                 console.print(f"[red]Command failed with code {exc.code}")
 
 
