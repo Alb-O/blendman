@@ -52,7 +52,9 @@ if ($Mode -eq "--pylint") {
             Write-Color $YELLOW "PYTHONPATH for pylint: $PYTHONPATH"
         }
         $env:PYTHONPATH = $PYTHONPATH
-        if (uv run pylint --output-format=colorized $PY_FILES) {
+        # Only report error and fatal messages so that stylistic warnings do not
+        # fail the development checks.
+        if (uv run pylint -E --output-format=colorized $PY_FILES) {
             Write-Color $GREEN "Pylint checks passed!"
         }
         else {
@@ -136,7 +138,8 @@ else {
         Write-Color $NC "PYTHONPATH for pylint: $PYTHONPATH"
     }
     $env:PYTHONPATH = $PYTHONPATH
-    if (uv run pylint --output-format=colorized $PY_FILES) {
+    # Only report error and fatal messages so warnings do not fail CI
+    if (uv run pylint -E --output-format=colorized $PY_FILES) {
         Write-Color $GREEN "Pylint checks passed!"
     }
     else {

@@ -36,5 +36,5 @@ priority = "include"
         with open(path, "w", encoding="utf-8") as f:
             f.write(default_config)
         console.print(f"[green]Default blendman config created at {path}.")
-    except Exception as e:
-        console.print(f"[red]Failed to create config: {e}")
+    except OSError as exc:
+        console.print(f"[red]Failed to create config: {exc}")

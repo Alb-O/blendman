@@ -4,10 +4,9 @@ Unit tests for Watcher in watcher.py (stub, as actual file watching requires int
 
 # pylint: disable=import-outside-toplevel
 
-from rename_watcher.watcher import Watcher
-
-
 import tempfile
+
+from rename_watcher.watcher import Watcher
 
 
 def test_init() -> None:

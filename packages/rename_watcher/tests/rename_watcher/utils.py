@@ -1,6 +1,7 @@
-"""
-Shared test data generators and helpers for rename_watcher fuzzing and property-based tests.
-"""
+"""Shared test data generators and helpers for rename_watcher fuzzing."""
+
+# This module has helper functions with many parameters for flexibility
+# pylint: disable=too-many-arguments,too-many-positional-arguments
 
 import os
 import random
