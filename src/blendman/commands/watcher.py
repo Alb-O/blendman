@@ -20,6 +20,7 @@ from rich.console import Console  # type: ignore
 from rename_watcher.config import get_config
 from blendman.watcher_bridge import WatcherBridge
 from blendman.db_interface import DBInterface
+from blendman.commands.config import create_default_config
 
 
 def setup_logging():
@@ -58,36 +59,76 @@ def is_pocketbase_running(host: str = "127.0.0.1", port: int = 8090) -> bool:
 
 
 def start_pocketbase_if_needed(app_console: Console) -> None:
-    """Start the PocketBase server if it is not already running."""
+    """Start PocketBase if not running and guide the user through first-time setup."""
     if is_pocketbase_running():
         app_console.print("[green]PocketBase server is already running.")
         return
-    app_console.print(
-        "[yellow]PocketBase server not detected. Attempting to start it..."
-    )
+
     backend_dir = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "../../../packages/pocketbase_backend")
     )
+    pb_data_dir = os.path.join(backend_dir, "pb_data")
+    first_run = not os.path.exists(pb_data_dir)
+
     system = platform.system().lower()
     if system == "windows":
         bin_path = os.path.join(backend_dir, "pocketbase_bin.exe")
-        cmd = [bin_path, "serve"]
-        subprocess.Popen(
-            cmd,
-            cwd=backend_dir,
-            creationflags=subprocess.CREATE_NEW_CONSOLE,
-        )  # pylint: disable=consider-using-with
+        serve_cmd = [bin_path, "serve"]
+        creationflags = subprocess.CREATE_NEW_CONSOLE
     else:
         bin_path = os.path.join(backend_dir, "pocketbase_bin")
-        cmd = [bin_path, "serve"]
-        subprocess.Popen(cmd, cwd=backend_dir)  # pylint: disable=consider-using-with
-    # Wait for server to be available
+        serve_cmd = [bin_path, "serve"]
+        creationflags = 0
+
+    if not os.path.exists(bin_path):
+        app_console.print(
+            "[red]PocketBase binary not found. Run 'python packages/pocketbase_backend/download_pocketbase.py' to download it."
+        )
+        raise FileNotFoundError("PocketBase binary missing")
+
+    app_console.print(
+        "[yellow]PocketBase server not detected. Attempting to start it..."
+    )
+    subprocess.Popen(serve_cmd, cwd=backend_dir, creationflags=creationflags)  # pylint: disable=consider-using-with
+
+    # Wait for server to become reachable
     for _ in range(20):
         if is_pocketbase_running():
             app_console.print("[green]PocketBase server started.")
-            return
+            break
         time.sleep(0.5)
-    raise RuntimeError("PocketBase server did not start within 10 seconds.")
+    else:
+        raise RuntimeError("PocketBase server did not start within 10 seconds.")
+
+    if first_run:
+        admin_email = os.environ.get("POCKETBASE_ADMIN_EMAIL")
+        admin_pass = os.environ.get("POCKETBASE_ADMIN_PASSWORD")
+        if admin_email and admin_pass:
+            app_console.print(
+                "[yellow]Initializing PocketBase with provided admin credentials..."
+            )
+            try:
+                subprocess.run(
+                    [bin_path, "superuser", "upsert", admin_email, admin_pass],
+                    cwd=backend_dir,
+                    check=True,
+                    capture_output=True,
+                )
+                app_console.print("[green]Superuser account created or updated.")
+            except subprocess.CalledProcessError as exc:
+                app_console.print(
+                    f"[red]Failed to create superuser automatically: {exc}."
+                )
+                app_console.print(
+                    f"Run '{bin_path} superuser upsert <EMAIL> <PASSWORD>' manually or visit http://127.0.0.1:8090/_/ in your browser to finish setup."
+                )
+        else:
+            app_console.print(
+                "[yellow]PocketBase appears uninitialized. Visit http://127.0.0.1:8090/_/ in your browser to create a superuser,"
+            )
+            app_console.print(
+                f"or run '{bin_path} superuser upsert <EMAIL> <PASSWORD>' from the command line."
+            )
 
 
 @watcher_app.command()
@@ -115,10 +156,23 @@ def start(
     log = structlog.get_logger("blendman.cli")
     console.print(f"[bold green]Starting watcher with config:[/] {config_path}")
     os.environ["BLENDMAN_CONFIG_TOML"] = config_path
+    if not os.path.exists(config_path):
+        console.print(
+            f"[yellow]No config found at {config_path}. Creating default one."
+        )
+        create_default_config(config_path, console)
     try:
         start_pocketbase_if_needed(console)
         config = get_config()
         console.print(f"[green]Loaded config:[/] {config}")
+        if not os.environ.get("POCKETBASE_ADMIN_EMAIL") or not os.environ.get(
+            "POCKETBASE_ADMIN_PASSWORD"
+        ):
+            console.print(
+                "[red]PocketBase admin credentials missing. Set POCKETBASE_ADMIN_EMAIL and POCKETBASE_ADMIN_PASSWORD in the environment or a .env file."
+            )
+            console.print("Example: cp .env.example .env && edit the values.")
+            return
         db = DBInterface()
         watch_abspath = os.path.abspath(watch_path)
         matcher = config.get("matcher")
@@ -141,6 +195,9 @@ def start(
         )
         while True:
             time.sleep(1)
+    except ValueError as exc:
+        log.error("Configuration error", error=str(exc))
+        console.print(f"[red]{exc}")
     except KeyboardInterrupt:
         log.info("Watcher stopped by user")
         console.print("[yellow]Watcher stopped by user.")

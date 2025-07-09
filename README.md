@@ -18,6 +18,8 @@ Copy `.env.example` to `.env` and set:
 - `POCKETBASE_ADMIN_EMAIL`
 - `POCKETBASE_ADMIN_PASSWORD`
 - `BLENDMAN_CONFIG` (optional)
+These values are used on first launch to automatically create the PocketBase superuser
+if it doesn't already exist.
 
 
 ### 3. Run the CLI
@@ -39,6 +41,9 @@ Replace `--help` with any command you want to run. For example:
   ```sh
   python -m blendman.cli watcher start --config-path blendman_config.toml
   ```
+  If `blendman_config.toml` doesn't exist, the CLI will create a default one for you.
+  On first run the CLI will also start PocketBase automatically. If PocketBase hasn't
+  been initialized yet you'll get instructions to create a superuser account.
 - Check watcher status:
   ```sh
   python -m blendman.cli watcher status
