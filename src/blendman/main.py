@@ -11,9 +11,16 @@ console = Console()
 
 def main() -> None:
     """Run the Blendman Typer CLI with a friendly greeting and ASCII logo."""
-    figlet = Figlet(font="slant")
-    ascii_logo = figlet.renderText("Blendman")
-    console.print(Panel(ascii_logo, style="bold cyan", border_style="cyan"))
+    figlet = Figlet(font="larry3d")
+    ascii_logo = figlet.renderText("BLENDMAN")
+    console.print(
+        Panel(
+            ascii_logo,
+            style="bold bluered`",
+            width=75,
+            subtitle="Welcome to Blendman CLI",
+        )
+    )
     app()
 
 

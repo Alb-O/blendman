@@ -10,7 +10,7 @@ from datetime import datetime
 from pydantic import BaseModel  # type: ignore
 
 
-class FileDirModel(BaseModel):
+class FileDirModel(BaseModel):  # type: ignore
     """
     Represents a file or directory in the system.
 
@@ -33,7 +33,7 @@ class FileDirModel(BaseModel):
     updated_at: datetime
 
 
-class RenameLogModel(BaseModel):
+class RenameLogModel(BaseModel):  # type: ignore
     """
     Represents a rename/move event for a file or directory.
 
