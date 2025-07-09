@@ -3,7 +3,7 @@ Tests for AuthClient in auth.py.
 """
 
 from unittest.mock import patch, MagicMock
-import pytest
+import pytest  # type: ignore
 import requests  # type: ignore
 from pocketbase.auth import AuthClient
 from pocketbase.exceptions import PocketBaseError
@@ -58,7 +58,7 @@ def test_logout_success():
     Test expected logout behavior after login.
     """
     client = AuthClient()
-    client.token = "abc123"
+    client.token_manager.set_token("abc123")
     client.user = {"id": "user1"}
     client.logout()
     assert client.get_token() is None

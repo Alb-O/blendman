@@ -6,9 +6,9 @@ Exposes APIs for persisting and querying file/dir state and rename logs.
 
 from typing import List, Optional
 from packages.pocketbase_backend.src.pocketbase.api import PocketBaseAPI
-from dotenv import load_dotenv  # type: ignore
-import os
+from packages.pocketbase_backend.src.pocketbase.auth import AuthClient
 import logging
+import os
 
 
 class DBInterface:
@@ -17,13 +17,21 @@ class DBInterface:
     """
 
     def __init__(self):
-        load_dotenv()
-        self.api = PocketBaseAPI()
         self.logger = logging.getLogger("DBInterface")
-        self.api.auth.login(
-            email=os.getenv("POCKETBASE_ADMIN_EMAIL"),
-            password=os.getenv("POCKETBASE_ADMIN_PASSWORD"),
-        )
+        self.auth_client = AuthClient()
+        # Use admin credentials from env for initial login
+        admin_email = os.environ.get("POCKETBASE_ADMIN_EMAIL")
+        admin_password = os.environ.get("POCKETBASE_ADMIN_PASSWORD")
+        if not admin_email or not admin_password:
+            raise ValueError(
+                "POCKETBASE_ADMIN_EMAIL and POCKETBASE_ADMIN_PASSWORD must be set in environment."
+            )
+        try:
+            self.auth_client.login(admin_email, admin_password)
+        except Exception as e:
+            self.logger.error(f"Auth login failed: {e}")
+            raise
+        self.api = PocketBaseAPI()
 
     def persist_event(self, event: dict) -> None:
         """
@@ -37,6 +45,11 @@ class DBInterface:
                 "parent_id": event.get("parent_id"),
                 "type": event["type"],
             }
+            # Ensure token is valid before DB operation
+            if not self.auth_client.get_token():
+                admin_email = os.environ.get("POCKETBASE_ADMIN_EMAIL")
+                admin_password = os.environ.get("POCKETBASE_ADMIN_PASSWORD")
+                self.auth_client.login(admin_email, admin_password)
             file_record = self.api.collections.create("files", file_data)
             # Insert rename log
             log_data = {

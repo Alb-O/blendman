@@ -5,17 +5,17 @@ Configuration and environment loading for rename_watcher.
 import os
 import pathlib
 from typing import Dict, Any, Callable
-from dotenv import load_dotenv # type: ignore[import]
+from dotenv import load_dotenv  # type: ignore[import]
 
 load_dotenv()
 
 try:
-    import tomli # type: ignore[import]
+    import tomli  # type: ignore[import]
 except ImportError:
     tomli = None  # type: ignore[assignment]
 
 try:
-    import pathspec # type: ignore[import]
+    import pathspec  # type: ignore[import]
 except ImportError:
     pathspec = None  # type: ignore[assignment]
 

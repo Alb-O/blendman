@@ -92,35 +92,43 @@ This repo includes `.github/workflows/ci.yml` to run lint, type-check, and tests
 
 ---
 
-See [uv workspace docs](https://docs.astral.sh/uv/concepts/projects/workspaces/) for more details.
 
----
+# PocketBase Auth Management - Setup and Security Notes
 
-## DB Interface Watcher Log (Feature 004)
+## Setup
 
-This feature provides a robust, modular interface between the PocketBase backend and the Rename Watcher, enabling unified tracking of file and directory state and history.
-
-### Setup
-- Ensure PocketBase is running and configured via `.env` (see `.env.example`).
-- All required environment variables:
+1. Copy `.env.example` to `.env` and fill in all required secrets:
   - `POCKETBASE_URL`
   - `POCKETBASE_ADMIN_EMAIL`
   - `POCKETBASE_ADMIN_PASSWORD`
-- Dependencies: `pydantic`, `python-dotenv` (installed via `uv`).
+  - (Optional) `POCKETBASE_OTP_SECRET`, `POCKETBASE_OAUTH2_CLIENT_ID`, etc.
+2. Install dependencies:
+  - `pip install -r requirements.txt` (or use `uv`/`venv_linux` as per project)
+3. Run validation:
+  - `./dev.sh` (Linux/macOS) or `./dev.ps1` (Windows)
 
-### Integration
-- The watcher bridge subscribes to file/dir events and persists them in PocketBase using the DB interface.
-- All code lives in `src/blendman/`:
-  - `models.py`: DB models for files, directories, and logs
-  - `db_interface.py`: Main interface logic
-  - `watcher_bridge.py`: Event subscription and transformation
+## Security Notes
 
-### Testing & Validation
-- Run all validation gates with:
-  ```sh
-  ./dev.sh
-  ```
-- Unit tests for all logic are in `tests/blendman/`.
-- All errors are logged and handled robustly.
+- All secrets are loaded from environment variables only (never hardcoded).
+- Tokens are managed in memory only and never persisted to disk.
+- Superuser tokens should be used only for internal server-to-server operations.
+- MFA and OAuth2 require configuration in the PocketBase admin UI.
+- All error cases are logged and surfaced to the caller.
 
-See the PRD for full details and requirements.
+## Auth Flows Supported
+- Password login
+- OTP login (if enabled)
+- OAuth2 login (if enabled)
+- MFA (if enabled)
+- Impersonation (superuser)
+- Token refresh
+
+## Validation
+- All new logic is covered by Pytest unit tests (expected, edge, and failure cases).
+- Run `./dev.sh` or `./dev.ps1` after every major change; all validation gates must pass.
+- No hardcoded secrets; all config via environment variables.
+- All code is type-checked (`mypy`), linted (`ruff`), and formatted.
+
+## Troubleshooting
+- If a validation gate fails, debug, fix, and re-run until it passes. Document root causes and solutions in `NOTEPAD.md`.
+- For more details, see `.github/projects/feats/006_pocketbase_auth_management/PRD.md`.
