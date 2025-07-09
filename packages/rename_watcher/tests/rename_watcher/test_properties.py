@@ -3,13 +3,14 @@ Property-based tests for rename_watcher using Hypothesis stateful testing.
 """
 
 # See utils.py for shared helpers and data generators.
-from hypothesis import event, settings  # type: ignore
-from hypothesis.stateful import (  # type: ignore
+# The following imports use type: ignore because Hypothesis does not ship with full type stubs.
+from hypothesis import event, settings
+from hypothesis.stateful import (
     RuleBasedStateMachine,
     rule,
     precondition,
     invariant,
-    run_state_machine_as_test,
+    run_state_machine_as_test,  # type: ignore
 )
 from hypothesis import strategies as st  # type: ignore
 
@@ -59,7 +60,10 @@ class FileSystemMachine(RuleBasedStateMachine):
         assert len(self.files) == len(set(self.files))
 
 
-def test_filesystem_state_machine():
+def test_filesystem_state_machine() -> None:
+    """
+    Run the Hypothesis state machine test for the file system model.
+    """
     run_state_machine_as_test(
         FileSystemMachine,
         settings=settings(

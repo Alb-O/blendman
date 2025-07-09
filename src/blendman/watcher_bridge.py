@@ -6,7 +6,7 @@ Subscribes to RenameWatcher events and persists them using the DB interface.
 
 from packages.rename_watcher.src.rename_watcher.api import RenameWatcherAPI
 from .db_interface import DBInterface
-import structlog # type: ignore
+import structlog  # type: ignore
 
 
 class WatcherBridge:
