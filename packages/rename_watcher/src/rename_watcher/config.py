@@ -34,8 +34,9 @@ def get_toml_config() -> Dict[str, Any]:
         return {}
     try:
         with open(config_path, "rb") as f:
-            return tomli.load(f)
-    except (OSError, tomli.TOMLDecodeError):  # Only catch file/parse errors
+            config = tomli.load(f)
+            return config
+    except (OSError, tomli.TOMLDecodeError) as e:  # Only catch file/parse errors
         # Fallback to empty config if TOML is invalid
         return {}
 
@@ -52,6 +53,7 @@ def get_patterns_from_config(config: Dict[str, Any]) -> Dict[str, Any]:
     """
     include = []
     ignore = []
+    # Only look for priority at the top level, default to 'ignore' if not set
     priority = config.get("priority", "ignore")
     if "include" in config and isinstance(config["include"], dict):
         include = config["include"].get("patterns", [])  # type: ignore[attr-defined]

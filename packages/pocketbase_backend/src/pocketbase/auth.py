@@ -44,7 +44,8 @@ class AuthClient:
         Raises:
             PocketBaseError: If authentication fails or API returns an error.
         """
-        url = f"{self.base_url}/api/collections/users/auth-with-password"
+        # Always use 'identity' for both admin and user endpoints
+        url = f"{self.base_url}/api/collections/_superusers/auth-with-password"
         data = {"identity": username, "password": password}
         try:
             resp = requests.post(url, json=data, timeout=10)
