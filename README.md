@@ -47,36 +47,36 @@ export PYTHONPATH=src:packages/rename_watcher/src:packages/pocketbase_backend/sr
 source .venv/bin/activate.fish
 set -x PYTHONPATH src:packages/rename_watcher/src:packages/pocketbase_backend/src
 
-# Run the CLI (works in any shell after activation and PYTHONPATH set)
-python -m blendman.cli --help
+# Run the interactive shell (works in any shell after activation and PYTHONPATH set)
+python -m blendman
 ```
 
 > **Note:** Use `export` for bash/zsh, and `set -x` for fish. Adjust activation and environment commands as needed for your shell.
 
-Replace `--help` with any command you want to run. For example:
+Replace the interactive prompt with any command to run it directly. For example:
 
 - Start the watcher:
   ```sh
-  python -m blendman.cli watcher start --config-path blendman_config.toml
+  python -m blendman watcher start --config-path blendman_config.toml
   ```
   If `blendman_config.toml` doesn't exist, the CLI will create a default one for you.
   On first run the CLI will also start PocketBase automatically. If PocketBase hasn't
   been initialized yet you'll get instructions to create a superuser account.
 - Check watcher status:
   ```sh
-  python -m blendman.cli watcher status
+  python -m blendman watcher status
   ```
 - Query backend logs:
   ```sh
-  python -m blendman.cli backend query logs
+  python -m blendman backend query logs
   ```
 - Open PocketBase dashboard UI:
   ```sh
-  python -m blendman.cli pocketbase ui
+  python -m blendman pocketbase ui
   ```
 - Create a PocketBase superuser:
   ```sh
-  python -m blendman.cli pocketbase superuser admin@example.com password
+  python -m blendman pocketbase superuser admin@example.com password
   ```
 
 
