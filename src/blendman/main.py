@@ -28,7 +28,7 @@ def _print_logo() -> None:
             ascii_logo,
             style="bold blue",
             width=75,
-            subtitle="Welcome to Blendman CLI",
+            subtitle="Welcome to Blendman CLI. Type 'help' for commands.",
         )
     )
 
@@ -56,19 +56,25 @@ def interactive_shell() -> None:
             return "dead"
 
     def status_bar() -> str:
-        pb = "[green]PB: running[/]" if is_pocketbase_running() else "[red]PB: stopped[/]"
+        pb = (
+            "<ansigreen><b> PB: running </b></ansigreen>"
+            if is_pocketbase_running()
+            else "<ansired><b> PB: stopped </b></ansired>"
+        )
         watch = watcher_status()
         watch_dirs = os.getenv("BLENDMAN_WATCH_PATH", os.getcwd())
-        return f"{pb} | [cyan]watcher: {watch}[/] | [magenta]{watch_dirs}[/]"
+        return f"{pb} watcher: {watch} | {watch_dirs}"
 
-    style = Style.from_dict({
-        "prompt": "bold cyan",
-        "bottom-toolbar": "bg:#444444 #ffffff",
-    })
+    style = Style.from_dict(
+        {
+            "prompt": "bold fg:ansicyan",
+            "bottom-toolbar": "fg:ansiwhite nobold",
+        }
+    )
 
     _print_logo()
     session = PromptSession(
-        HTML("<prompt>blendman&gt;</prompt> "),
+        HTML("<prompt>blendman></prompt> "),
         bottom_toolbar=lambda: HTML(status_bar()),
         style=style,
     )
@@ -84,7 +90,8 @@ def interactive_shell() -> None:
         try:
             line = session.prompt()
         except (EOFError, KeyboardInterrupt):
-            console.print()
+            # No rich console needed here, just break
+            print()  # Use regular print for a newline
             break
         if not line.strip():
             continue
@@ -106,9 +113,13 @@ def interactive_shell() -> None:
             app(args, standalone_mode=False)
         except click.UsageError:
             # Friendly error for unknown commands
-            console.print(f"[yellow]Unknown command:[/] '{' '.join(args)}'\nType 'help' or exit.")
+            console = Console()
+            console.print(
+                f"[yellow]Unknown command:[/] '{' '.join(args)}'\nType 'help' or exit."
+            )
         except SystemExit as exc:  # pragma: no cover - handled gracefully
             if exc.code != 0:
+                console = Console()
                 console.print(f"[red]Command failed with code {exc.code}")
 
 
