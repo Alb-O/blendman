@@ -27,7 +27,7 @@ def test_cli_help():
 
 
 def test_config_init(tmp_path):
-    config_path = tmp_path / "test_watcher_config.toml"
+    config_path = tmp_path / "test_blendman_config.toml"
     result = runner.invoke(app, ["config", "init", "--path", str(config_path)])
     assert result.exit_code == 0
     assert config_path.exists()

@@ -5,31 +5,31 @@ Configuration and environment loading for rename_watcher.
 import os
 import pathlib
 from typing import Dict, Any, Callable
-from dotenv import load_dotenv
+from dotenv import load_dotenv # type: ignore[import]
 
 load_dotenv()
 
 try:
-    import tomli
+    import tomli # type: ignore[import]
 except ImportError:
     tomli = None  # type: ignore[assignment]
 
 try:
-    import pathspec
+    import pathspec # type: ignore[import]
 except ImportError:
     pathspec = None  # type: ignore[assignment]
 
 
 def get_toml_config() -> Dict[str, Any]:
     """
-    Load configuration from a TOML file if it exists. Uses WATCHER_CONFIG_TOML env var if set.
+    Load configuration from a TOML file if it exists. Uses BLENDMAN_CONFIG_TOML env var if set.
 
     Returns:
         Dict[str, Any]: Configuration dictionary, or empty dict if not found or invalid.
     """
     if not tomli:
         raise ImportError("tomli is required for TOML config parsing.")
-    config_path = os.getenv("WATCHER_CONFIG_TOML", "watcher_config.toml")
+    config_path = os.getenv("BLENDMAN_CONFIG_TOML", "blendman_config.toml")
     if not os.path.exists(config_path):
         return {}
     try:

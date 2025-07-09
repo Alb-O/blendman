@@ -28,14 +28,14 @@ console = Console()
 @watcher_app.command()
 def start(
     config_path: str = typer.Option(
-        "watcher_config.toml", help="Path to watcher config TOML file."
+        "blendman_config.toml", help="Path to blendman config TOML file."
     ),
 ):
     """
     Start the watcher with the given config and bridge events to the backend DB.
     """
     console.print(f"[bold green]Starting watcher with config:[/] {config_path}")
-    os.environ["WATCHER_CONFIG_TOML"] = config_path
+    os.environ["BLENDMAN_CONFIG_TOML"] = config_path
     try:
         config = get_config()
         console.print(f"[green]Loaded config:[/] {config}")

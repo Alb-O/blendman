@@ -55,7 +55,7 @@ def test_toml_config_parsing(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) ->
         """
     )
     toml_path = write_toml(toml_content)
-    monkeypatch.setenv("WATCHER_CONFIG_TOML", toml_path)
+    monkeypatch.setenv("BLENDMAN_CONFIG_TOML", toml_path)
     config_mod = reload_config_module()
     cfg = config_mod.get_config()  # type: ignore[attr-defined]
     assert "patterns" in cfg
@@ -75,7 +75,7 @@ def test_env_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     Test fallback to environment variables if TOML config is missing (edge case).
     """
-    monkeypatch.delenv("WATCHER_CONFIG_TOML", raising=False)
+    monkeypatch.delenv("BLENDMAN_CONFIG_TOML", raising=False)
     monkeypatch.setenv("WATCHER_IGNORE_PATTERNS", ".git,.env,.cache")
     config_mod = reload_config_module()
     cfg = config_mod.get_config()  # type: ignore[attr-defined]
@@ -98,7 +98,7 @@ def test_matcher_logic(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """
     )
     toml_path = write_toml(toml_content)
-    monkeypatch.setenv("WATCHER_CONFIG_TOML", toml_path)
+    monkeypatch.setenv("BLENDMAN_CONFIG_TOML", toml_path)
     config_mod = reload_config_module()
     cfg = config_mod.get_config()  # type: ignore[attr-defined]
     matcher = config_mod.get_path_matcher(cfg["patterns"])  # type: ignore[attr-defined]
@@ -117,7 +117,7 @@ def test_invalid_toml(monkeypatch: pytest.MonkeyPatch) -> None:
     Test error on invalid TOML config (failure case).
     """
     toml_path = write_toml("not a toml file!")
-    monkeypatch.setenv("WATCHER_CONFIG_TOML", toml_path)
+    monkeypatch.setenv("BLENDMAN_CONFIG_TOML", toml_path)
     # If the config loader returns defaults or logs instead of raising,
     # just check it returns a config dict
     cfg = reload_config_module().get_config()  # type: ignore[attr-defined]
@@ -133,7 +133,7 @@ def test_ignore_all_pattern(monkeypatch: pytest.MonkeyPatch) -> None:
     patterns = ["*"]
     """
     toml_path = write_toml(toml_content)
-    monkeypatch.setenv("WATCHER_CONFIG_TOML", toml_path)
+    monkeypatch.setenv("BLENDMAN_CONFIG_TOML", toml_path)
     config_mod = reload_config_module()
     cfg = config_mod.get_config()  # type: ignore[attr-defined]
     matcher = config_mod.get_path_matcher(cfg["patterns"])  # type: ignore[attr-defined]
@@ -152,7 +152,7 @@ def test_include_single_extension(monkeypatch: pytest.MonkeyPatch) -> None:
     patterns = [".blend"]
     """
     toml_path = write_toml(toml_content)
-    monkeypatch.setenv("WATCHER_CONFIG_TOML", toml_path)
+    monkeypatch.setenv("BLENDMAN_CONFIG_TOML", toml_path)
     config_mod = reload_config_module()
     cfg = config_mod.get_config()  # type: ignore[attr-defined]
     matcher = config_mod.get_path_matcher(cfg["patterns"])  # type: ignore[attr-defined]
@@ -176,7 +176,7 @@ def test_priority_option(monkeypatch: pytest.MonkeyPatch) -> None:
     patterns = ["data/"]
     """
     toml_path_ignore = write_toml(toml_content_ignore)
-    monkeypatch.setenv("WATCHER_CONFIG_TOML", toml_path_ignore)
+    monkeypatch.setenv("BLENDMAN_CONFIG_TOML", toml_path_ignore)
     config_mod = reload_config_module()
     cfg = config_mod.get_config()  # type: ignore[attr-defined]
     matcher = config_mod.get_path_matcher(cfg["patterns"])  # type: ignore[attr-defined]
@@ -192,7 +192,7 @@ def test_priority_option(monkeypatch: pytest.MonkeyPatch) -> None:
     patterns = ["data/"]
     """
     toml_path_include = write_toml(toml_content_include)
-    monkeypatch.setenv("WATCHER_CONFIG_TOML", toml_path_include)
+    monkeypatch.setenv("BLENDMAN_CONFIG_TOML", toml_path_include)
     config_mod = reload_config_module()
     cfg = config_mod.get_config()  # type: ignore[attr-defined]
     matcher = config_mod.get_path_matcher(cfg["patterns"])  # type: ignore[attr-defined]

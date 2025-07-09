@@ -130,7 +130,7 @@ app = typer.Typer()
 console = Console()
 
 @app.command()
-def watcher_start(config: str = "watcher_config.toml"):
+def watcher_start(config: str = "blendman_config.toml"):
     # Load config, start watcher, bridge events to DB
     ...
 

@@ -16,10 +16,10 @@ This project uses [uv workspaces](https://docs.astral.sh/uv/concepts/projects/wo
 uv pip install -e .
 ```
 
-### 2. Create a default watcher config (optional)
+### 2. Create a default blendman config (optional)
 
 ```sh
-python -m src.blendman.cli config init --path watcher_config.toml
+python -m src.blendman.cli config init --path blendman_config.toml
 ```
 
 ### 3. Run the CLI and see available commands
@@ -32,7 +32,7 @@ python -m src.blendman.cli --help
 
 - **Start the watcher:**
   ```sh
-  python -m src.blendman.cli watcher start --config-path watcher_config.toml
+  python -m src.blendman.cli watcher start --config-path blendman_config.toml
   ```
 - **Check watcher status:**
   ```sh
@@ -57,7 +57,7 @@ Copy `.env.example` to `.env` and set:
 - `POCKETBASE_URL`
 - `POCKETBASE_ADMIN_EMAIL`
 - `POCKETBASE_ADMIN_PASSWORD`
-- `WATCHER_CONFIG` (optional)
+- `BLENDMAN_CONFIG` (optional)
 
 ## Unified development check (lint, type-check, test)
 

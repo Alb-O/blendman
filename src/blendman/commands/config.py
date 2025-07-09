@@ -13,21 +13,21 @@ console = Console()
 @config_app.command()
 def init(
     path: str = typer.Option(
-        "watcher_config.toml",
-        help="Path to create the default watcher config TOML file.",
+        "blendman_config.toml",
+        help="Path to create the default blendman config TOML file.",
     ),
 ):
     """
-    Create a default watcher_config.toml at the specified path.
+    Create a default blendman_config.toml at the specified path.
     """
     default_config = """
 [include]
-patterns = ["*.blend", "*.txt"]
+patterns = [".blend"]
 
 [ignore]
-patterns = [".git", ".env", "__pycache__"]
+patterns = ["*"]
 
-priority = "ignore"
+priority = "include"
 """
     if os.path.exists(path):
         console.print(f"[yellow]Config file already exists at {path}.")
@@ -35,6 +35,6 @@ priority = "ignore"
     try:
         with open(path, "w", encoding="utf-8") as f:
             f.write(default_config)
-        console.print(f"[green]Default watcher config created at {path}.")
+        console.print(f"[green]Default blendman config created at {path}.")
     except Exception as e:
         console.print(f"[red]Failed to create config: {e}")

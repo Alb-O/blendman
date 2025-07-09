@@ -1,5 +1,9 @@
-# PocketBase binary (should not be tracked)
+# PocketBase binary
 packages/pocketbase_backend/pocketbase_bin
+
+# Generated config files
+blendman_config.toml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
