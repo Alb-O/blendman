@@ -18,6 +18,7 @@ dependencies = [
     "hypothesis>=6.0.0",
     "watchdog>=2.1.5",
     "pathspec>=0.12.1",
+    "pydantic>=2.11.7",
 ]
 
 [project.scripts]

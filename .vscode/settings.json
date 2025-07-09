@@ -1,3 +1,6 @@
 {
-  "python.analysis.extraPaths": ["packages/pocketbase_backend/src", "packages/rename_watcher/src"]
+  "python.analysis.extraPaths": [
+    "packages/pocketbase_backend/src",
+    "packages/rename_watcher/src"
+  ]
 }

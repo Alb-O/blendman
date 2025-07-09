@@ -69,3 +69,34 @@ This repo includes `.github/workflows/ci.yml` to run lint, type-check, and tests
 See [uv workspace docs](https://docs.astral.sh/uv/concepts/projects/workspaces/) for more details.
 
 See [uv workspace docs](https://docs.astral.sh/uv/concepts/projects/workspaces/) for more details.
+
+---
+
+## DB Interface Watcher Log (Feature 004)
+
+This feature provides a robust, modular interface between the PocketBase backend and the Rename Watcher, enabling unified tracking of file and directory state and history.
+
+### Setup
+- Ensure PocketBase is running and configured via `.env` (see `.env.example`).
+- All required environment variables:
+  - `POCKETBASE_URL`
+  - `POCKETBASE_ADMIN_EMAIL`
+  - `POCKETBASE_ADMIN_PASSWORD`
+- Dependencies: `pydantic`, `python-dotenv` (installed via `uv`).
+
+### Integration
+- The watcher bridge subscribes to file/dir events and persists them in PocketBase using the DB interface.
+- All code lives in `src/blendman/`:
+  - `models.py`: DB models for files, directories, and logs
+  - `db_interface.py`: Main interface logic
+  - `watcher_bridge.py`: Event subscription and transformation
+
+### Testing & Validation
+- Run all validation gates with:
+  ```sh
+  ./dev.sh
+  ```
+- Unit tests for all logic are in `tests/blendman/`.
+- All errors are logged and handled robustly.
+
+See the PRD for full details and requirements.
