@@ -37,6 +37,9 @@ def interactive_shell() -> None:
     """Run an interactive shell for executing CLI commands."""
     import click
 
+    # Mark shell mode so commands can behave differently when interactive.
+    os.environ["BLENDMAN_INTERACTIVE"] = "1"
+
     def is_pocketbase_running(host: str = "127.0.0.1", port: int = 8090) -> bool:
         try:
             with socket.create_connection((host, port), timeout=1):

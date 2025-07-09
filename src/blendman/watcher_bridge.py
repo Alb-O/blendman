@@ -36,6 +36,11 @@ class WatcherBridge:
             "[WatcherBridge] Subscribed to watcher events and started watcher."
         )
 
+    def stop(self) -> None:
+        """Stop watching for events."""
+        self.logger.info("[WatcherBridge] Stopping watcher.")
+        self.watcher.stop()
+
     def handle_event(self, event: dict) -> None:
         """Handle a watcher event and persist it using the DB interface."""
         self.logger.info(

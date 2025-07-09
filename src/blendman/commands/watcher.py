@@ -22,6 +22,9 @@ from blendman.watcher_bridge import WatcherBridge
 from blendman.db_interface import DBInterface
 from blendman.commands.config import create_default_config
 
+# Keep track of the watcher instance when running in interactive mode
+_bridge: WatcherBridge | None = None
+
 
 def setup_logging() -> None:
     """Configure rich logging for the CLI."""
@@ -179,11 +182,15 @@ def start(
         )
         bridge.start()
         console.print(
-            (
-                f"[bold green]Watcher started. PID: {os.getpid()} "
-                f"(PID file: {pidfile}). Press Ctrl+C to stop."
-            )
+            (f"[bold green]Watcher started. PID: {os.getpid()} (PID file: {pidfile}).")
         )
+        global _bridge
+        _bridge = bridge
+        if os.getenv("BLENDMAN_INTERACTIVE"):
+            console.print(
+                "[cyan]Watcher running in background. Use 'watcher stop' to stop."
+            )
+            return
         while True:
             time.sleep(1)
     except ValueError as exc:
@@ -197,8 +204,9 @@ def start(
         console.print(f"[red]Error starting watcher:[/] {exc}")
     finally:
         # Remove PID file on exit
-        if os.path.exists(pidfile):
+        if os.path.exists(pidfile) and not os.getenv("BLENDMAN_INTERACTIVE"):
             os.remove(pidfile)
+        _bridge = None
 
 
 @watcher_app.command()
@@ -210,6 +218,7 @@ def stop(
     """
     Stop the watcher process if running (by PID file).
     """
+    global _bridge
     if not os.path.exists(pidfile):
         console.print(
             f"[yellow]No watcher PID file found at {pidfile}. Is the watcher running?"
@@ -218,6 +227,12 @@ def stop(
     try:
         with open(pidfile, "r", encoding="utf-8") as f:
             pid = int(f.read().strip())
+        if pid == os.getpid() and _bridge is not None:
+            _bridge.stop()
+            console.print("[green]Stopped watcher.")
+            os.remove(pidfile)
+            _bridge = None
+            return
         if platform.system().lower() == "windows":
             import ctypes  # pylint: disable=import-outside-toplevel
 
@@ -253,7 +268,9 @@ def status(
         with open(pidfile, "r", encoding="utf-8") as f:
             pid = int(f.read().strip())
         # Check if process is alive
-        if platform.system().lower() == "windows":
+        if pid == os.getpid() and _bridge is not None:
+            alive = True
+        elif platform.system().lower() == "windows":
             import ctypes  # pylint: disable=import-outside-toplevel
 
             process_query_limited_information = 0x1000
